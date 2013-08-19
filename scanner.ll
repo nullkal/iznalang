@@ -1,5 +1,4 @@
 %{
-#include <cstdlib>
 #include <cerrno>
 #include <climits>
 #include <string>
@@ -21,11 +20,10 @@
 %}
 
 %option noyywrap nounput batch
-%option never-interactive
 %option noyy_scan_buffer
 %option noyy_scan_bytes
 %option noyy_scan_string
-%option nounistd
+%option always-interactive
 
 id    [a-zA-Z_][a-zA-Z_0-9]*
 int   [1-9][0-9]*
@@ -38,7 +36,7 @@ blank [ \t]
 	std::string string_buffer;
 %}
 
-[-+*/=()\n]		return yy::izna_parser::token_type(yytext[0]);
+[-+*/%=()\n]		return yy::izna_parser::token_type(yytext[0]);
 
 {blank}+		;
 {int}			{
@@ -47,28 +45,16 @@ blank [ \t]
 					if (n < LONG_MIN || n > LONG_MAX || errno == ERANGE)
 						driver.error("整数が範囲外です。");
 					yylval->value = n;
-					return token::TK_IVAL;
+					return token::TK_VALUE;
 				}
 "0"				{
 					yylval->value = 0;
-					return token::TK_IVAL;
+					return token::TK_VALUE;
 				}
 {id}			{
 					yylval->str = new std::string(yytext);
-					return token::TK_IDENTIFIER;
+					return token::TK_IDENT;
 				}
 .				driver.error("この文字を識別子で使用することはできません。");
 
 %%
-
-void izna_driver::scan_begin()
-{
-	if ((yyin = fopen(file.c_str(), "r")) == 0)
-		error(file + " がオープンできません。");
-}
-
-void izna_driver::scan_end()
-{
-	fclose(yyin);
-	yylex_destroy();
-}

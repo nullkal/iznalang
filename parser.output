@@ -1,0 +1,515 @@
+Terminals which are not used
+
+   TK_EOL
+
+
+Grammar
+
+    0 $accept: input "end of file"
+
+    1 input: /* empty */
+    2      | input line
+
+    3 line: '\n'
+    4     | error '\n'
+    5     | expr '\n'
+
+    6 expr: expr '+' expr
+    7     | expr '-' expr
+    8     | expr '*' expr
+    9     | expr '/' expr
+   10     | expr '%' expr
+   11     | "identifier" '=' expr
+   12     | '-' expr
+   13     | '(' expr ')'
+   14     | "identifier"
+   15     | "value"
+
+
+Terminals, with rules where they appear
+
+"end of file" (0) 0
+'\n' (10) 3 4 5
+'%' (37) 10
+'(' (40) 13
+')' (41) 13
+'*' (42) 8
+'+' (43) 6
+'-' (45) 7 12
+'/' (47) 9
+'=' (61) 11
+error (256) 4
+TK_EOL (258)
+"value" (259) 15
+"identifier" (260) 11 14
+NEG (261)
+
+
+Nonterminals, with rules where they appear
+
+$accept (16)
+    on left: 0
+input (17)
+    on left: 1 2, on right: 0 2
+line (18)
+    on left: 3 4 5, on right: 2
+expr (19)
+    on left: 6 7 8 9 10 11 12 13 14 15, on right: 5 6 7 8 9 10 11 12
+    13
+
+
+state 0
+
+    0 $accept: . input "end of file"
+    1 input: .
+    2      | . input line
+
+    $default  reduce using rule 1 (input)
+
+    input  go to state 1
+
+
+state 1
+
+    0 $accept: input . "end of file"
+    2 input: input . line
+    3 line: . '\n'
+    4     | . error '\n'
+    5     | . expr '\n'
+    6 expr: . expr '+' expr
+    7     | . expr '-' expr
+    8     | . expr '*' expr
+    9     | . expr '/' expr
+   10     | . expr '%' expr
+   11     | . "identifier" '=' expr
+   12     | . '-' expr
+   13     | . '(' expr ')'
+   14     | . "identifier"
+   15     | . "value"
+
+    "end of file"  shift, and go to state 2
+    error          shift, and go to state 3
+    "value"        shift, and go to state 4
+    "identifier"   shift, and go to state 5
+    '-'            shift, and go to state 6
+    '\n'           shift, and go to state 7
+    '('            shift, and go to state 8
+
+    line  go to state 9
+    expr  go to state 10
+
+
+state 2
+
+    0 $accept: input "end of file" .
+
+    $default  accept
+
+
+state 3
+
+    4 line: error . '\n'
+
+    '\n'  shift, and go to state 11
+
+
+state 4
+
+   15 expr: "value" .
+
+    $default  reduce using rule 15 (expr)
+
+
+state 5
+
+   11 expr: "identifier" . '=' expr
+   14     | "identifier" .  ['+', '-', '*', '/', '%', '\n', ')']
+
+    '='  shift, and go to state 12
+
+    $default  reduce using rule 14 (expr)
+
+
+state 6
+
+    6 expr: . expr '+' expr
+    7     | . expr '-' expr
+    8     | . expr '*' expr
+    9     | . expr '/' expr
+   10     | . expr '%' expr
+   11     | . "identifier" '=' expr
+   12     | . '-' expr
+   12     | '-' . expr
+   13     | . '(' expr ')'
+   14     | . "identifier"
+   15     | . "value"
+
+    "value"       shift, and go to state 4
+    "identifier"  shift, and go to state 5
+    '-'           shift, and go to state 6
+    '('           shift, and go to state 8
+
+    expr  go to state 13
+
+
+state 7
+
+    3 line: '\n' .
+
+    $default  reduce using rule 3 (line)
+
+
+state 8
+
+    6 expr: . expr '+' expr
+    7     | . expr '-' expr
+    8     | . expr '*' expr
+    9     | . expr '/' expr
+   10     | . expr '%' expr
+   11     | . "identifier" '=' expr
+   12     | . '-' expr
+   13     | . '(' expr ')'
+   13     | '(' . expr ')'
+   14     | . "identifier"
+   15     | . "value"
+
+    "value"       shift, and go to state 4
+    "identifier"  shift, and go to state 5
+    '-'           shift, and go to state 6
+    '('           shift, and go to state 8
+
+    expr  go to state 14
+
+
+state 9
+
+    2 input: input line .
+
+    $default  reduce using rule 2 (input)
+
+
+state 10
+
+    5 line: expr . '\n'
+    6 expr: expr . '+' expr
+    7     | expr . '-' expr
+    8     | expr . '*' expr
+    9     | expr . '/' expr
+   10     | expr . '%' expr
+
+    '+'   shift, and go to state 15
+    '-'   shift, and go to state 16
+    '*'   shift, and go to state 17
+    '/'   shift, and go to state 18
+    '%'   shift, and go to state 19
+    '\n'  shift, and go to state 20
+
+
+state 11
+
+    4 line: error '\n' .
+
+    $default  reduce using rule 4 (line)
+
+
+state 12
+
+    6 expr: . expr '+' expr
+    7     | . expr '-' expr
+    8     | . expr '*' expr
+    9     | . expr '/' expr
+   10     | . expr '%' expr
+   11     | . "identifier" '=' expr
+   11     | "identifier" '=' . expr
+   12     | . '-' expr
+   13     | . '(' expr ')'
+   14     | . "identifier"
+   15     | . "value"
+
+    "value"       shift, and go to state 4
+    "identifier"  shift, and go to state 5
+    '-'           shift, and go to state 6
+    '('           shift, and go to state 8
+
+    expr  go to state 21
+
+
+state 13
+
+    6 expr: expr . '+' expr
+    7     | expr . '-' expr
+    8     | expr . '*' expr
+    9     | expr . '/' expr
+   10     | expr . '%' expr
+   12     | '-' expr .  ['+', '-', '*', '/', '%', '\n', ')']
+
+    $default  reduce using rule 12 (expr)
+
+    Conflict between rule 12 and token '+' resolved as reduce ('+' < NEG).
+    Conflict between rule 12 and token '-' resolved as reduce ('-' < NEG).
+    Conflict between rule 12 and token '*' resolved as reduce ('*' < NEG).
+    Conflict between rule 12 and token '/' resolved as reduce ('/' < NEG).
+    Conflict between rule 12 and token '%' resolved as reduce ('%' < NEG).
+
+
+state 14
+
+    6 expr: expr . '+' expr
+    7     | expr . '-' expr
+    8     | expr . '*' expr
+    9     | expr . '/' expr
+   10     | expr . '%' expr
+   13     | '(' expr . ')'
+
+    '+'  shift, and go to state 15
+    '-'  shift, and go to state 16
+    '*'  shift, and go to state 17
+    '/'  shift, and go to state 18
+    '%'  shift, and go to state 19
+    ')'  shift, and go to state 22
+
+
+state 15
+
+    6 expr: . expr '+' expr
+    6     | expr '+' . expr
+    7     | . expr '-' expr
+    8     | . expr '*' expr
+    9     | . expr '/' expr
+   10     | . expr '%' expr
+   11     | . "identifier" '=' expr
+   12     | . '-' expr
+   13     | . '(' expr ')'
+   14     | . "identifier"
+   15     | . "value"
+
+    "value"       shift, and go to state 4
+    "identifier"  shift, and go to state 5
+    '-'           shift, and go to state 6
+    '('           shift, and go to state 8
+
+    expr  go to state 23
+
+
+state 16
+
+    6 expr: . expr '+' expr
+    7     | . expr '-' expr
+    7     | expr '-' . expr
+    8     | . expr '*' expr
+    9     | . expr '/' expr
+   10     | . expr '%' expr
+   11     | . "identifier" '=' expr
+   12     | . '-' expr
+   13     | . '(' expr ')'
+   14     | . "identifier"
+   15     | . "value"
+
+    "value"       shift, and go to state 4
+    "identifier"  shift, and go to state 5
+    '-'           shift, and go to state 6
+    '('           shift, and go to state 8
+
+    expr  go to state 24
+
+
+state 17
+
+    6 expr: . expr '+' expr
+    7     | . expr '-' expr
+    8     | . expr '*' expr
+    8     | expr '*' . expr
+    9     | . expr '/' expr
+   10     | . expr '%' expr
+   11     | . "identifier" '=' expr
+   12     | . '-' expr
+   13     | . '(' expr ')'
+   14     | . "identifier"
+   15     | . "value"
+
+    "value"       shift, and go to state 4
+    "identifier"  shift, and go to state 5
+    '-'           shift, and go to state 6
+    '('           shift, and go to state 8
+
+    expr  go to state 25
+
+
+state 18
+
+    6 expr: . expr '+' expr
+    7     | . expr '-' expr
+    8     | . expr '*' expr
+    9     | . expr '/' expr
+    9     | expr '/' . expr
+   10     | . expr '%' expr
+   11     | . "identifier" '=' expr
+   12     | . '-' expr
+   13     | . '(' expr ')'
+   14     | . "identifier"
+   15     | . "value"
+
+    "value"       shift, and go to state 4
+    "identifier"  shift, and go to state 5
+    '-'           shift, and go to state 6
+    '('           shift, and go to state 8
+
+    expr  go to state 26
+
+
+state 19
+
+    6 expr: . expr '+' expr
+    7     | . expr '-' expr
+    8     | . expr '*' expr
+    9     | . expr '/' expr
+   10     | . expr '%' expr
+   10     | expr '%' . expr
+   11     | . "identifier" '=' expr
+   12     | . '-' expr
+   13     | . '(' expr ')'
+   14     | . "identifier"
+   15     | . "value"
+
+    "value"       shift, and go to state 4
+    "identifier"  shift, and go to state 5
+    '-'           shift, and go to state 6
+    '('           shift, and go to state 8
+
+    expr  go to state 27
+
+
+state 20
+
+    5 line: expr '\n' .
+
+    $default  reduce using rule 5 (line)
+
+
+state 21
+
+    6 expr: expr . '+' expr
+    7     | expr . '-' expr
+    8     | expr . '*' expr
+    9     | expr . '/' expr
+   10     | expr . '%' expr
+   11     | "identifier" '=' expr .  ['\n', ')']
+
+    '+'  shift, and go to state 15
+    '-'  shift, and go to state 16
+    '*'  shift, and go to state 17
+    '/'  shift, and go to state 18
+    '%'  shift, and go to state 19
+
+    $default  reduce using rule 11 (expr)
+
+    Conflict between rule 11 and token '+' resolved as shift ('=' < '+').
+    Conflict between rule 11 and token '-' resolved as shift ('=' < '-').
+    Conflict between rule 11 and token '*' resolved as shift ('=' < '*').
+    Conflict between rule 11 and token '/' resolved as shift ('=' < '/').
+    Conflict between rule 11 and token '%' resolved as shift ('=' < '%').
+
+
+state 22
+
+   13 expr: '(' expr ')' .
+
+    $default  reduce using rule 13 (expr)
+
+
+state 23
+
+    6 expr: expr . '+' expr  ['+', '-', '\n', ')']
+    6     | expr '+' expr .  ['+', '-', '\n', ')']
+    7     | expr . '-' expr
+    8     | expr . '*' expr
+    9     | expr . '/' expr
+   10     | expr . '%' expr
+
+    '*'  shift, and go to state 17
+    '/'  shift, and go to state 18
+    '%'  shift, and go to state 19
+
+    $default  reduce using rule 6 (expr)
+
+    Conflict between rule 6 and token '+' resolved as reduce (%left '+').
+    Conflict between rule 6 and token '-' resolved as reduce (%left '-').
+    Conflict between rule 6 and token '*' resolved as shift ('+' < '*').
+    Conflict between rule 6 and token '/' resolved as shift ('+' < '/').
+    Conflict between rule 6 and token '%' resolved as shift ('+' < '%').
+
+
+state 24
+
+    6 expr: expr . '+' expr
+    7     | expr . '-' expr  ['+', '-', '\n', ')']
+    7     | expr '-' expr .  ['+', '-', '\n', ')']
+    8     | expr . '*' expr
+    9     | expr . '/' expr
+   10     | expr . '%' expr
+
+    '*'  shift, and go to state 17
+    '/'  shift, and go to state 18
+    '%'  shift, and go to state 19
+
+    $default  reduce using rule 7 (expr)
+
+    Conflict between rule 7 and token '+' resolved as reduce (%left '+').
+    Conflict between rule 7 and token '-' resolved as reduce (%left '-').
+    Conflict between rule 7 and token '*' resolved as shift ('-' < '*').
+    Conflict between rule 7 and token '/' resolved as shift ('-' < '/').
+    Conflict between rule 7 and token '%' resolved as shift ('-' < '%').
+
+
+state 25
+
+    6 expr: expr . '+' expr
+    7     | expr . '-' expr
+    8     | expr . '*' expr  ['+', '-', '*', '/', '%', '\n', ')']
+    8     | expr '*' expr .  ['+', '-', '*', '/', '%', '\n', ')']
+    9     | expr . '/' expr
+   10     | expr . '%' expr
+
+    $default  reduce using rule 8 (expr)
+
+    Conflict between rule 8 and token '+' resolved as reduce ('+' < '*').
+    Conflict between rule 8 and token '-' resolved as reduce ('-' < '*').
+    Conflict between rule 8 and token '*' resolved as reduce (%left '*').
+    Conflict between rule 8 and token '/' resolved as reduce (%left '/').
+    Conflict between rule 8 and token '%' resolved as reduce (%left '%').
+
+
+state 26
+
+    6 expr: expr . '+' expr
+    7     | expr . '-' expr
+    8     | expr . '*' expr
+    9     | expr . '/' expr  ['+', '-', '*', '/', '%', '\n', ')']
+    9     | expr '/' expr .  ['+', '-', '*', '/', '%', '\n', ')']
+   10     | expr . '%' expr
+
+    $default  reduce using rule 9 (expr)
+
+    Conflict between rule 9 and token '+' resolved as reduce ('+' < '/').
+    Conflict between rule 9 and token '-' resolved as reduce ('-' < '/').
+    Conflict between rule 9 and token '*' resolved as reduce (%left '*').
+    Conflict between rule 9 and token '/' resolved as reduce (%left '/').
+    Conflict between rule 9 and token '%' resolved as reduce (%left '%').
+
+
+state 27
+
+    6 expr: expr . '+' expr
+    7     | expr . '-' expr
+    8     | expr . '*' expr
+    9     | expr . '/' expr
+   10     | expr . '%' expr  ['+', '-', '*', '/', '%', '\n', ')']
+   10     | expr '%' expr .  ['+', '-', '*', '/', '%', '\n', ')']
+
+    $default  reduce using rule 10 (expr)
+
+    Conflict between rule 10 and token '+' resolved as reduce ('+' < '%').
+    Conflict between rule 10 and token '-' resolved as reduce ('-' < '%').
+    Conflict between rule 10 and token '*' resolved as reduce (%left '*').
+    Conflict between rule 10 and token '/' resolved as reduce (%left '/').
+    Conflict between rule 10 and token '%' resolved as reduce (%left '%').

@@ -1,5 +1,6 @@
+#line 2 "scanner.cc"
 
-#line 3 "lex.yy.c"
+#line 4 "scanner.cc"
 
 #define  YY_INT_ALIGNED short int
 
@@ -383,7 +384,7 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    2,    1,    1,    1,    1,    1,    1,    1,    4,
+        1,    2,    1,    1,    1,    1,    4,    1,    1,    4,
         4,    4,    4,    1,    4,    1,    4,    5,    6,    6,
         6,    6,    6,    6,    6,    6,    6,    1,    1,    1,
         4,    1,    1,    1,    7,    7,    7,    7,    7,    7,
@@ -457,7 +458,6 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "scanner.ll"
 #line 2 "scanner.ll"
-#include <cstdlib>
 #include <cerrno>
 #include <climits>
 #include <string>
@@ -476,8 +476,7 @@ char *yytext;
 #define yywrap() 1
 
 #define yyterminate()	return token::TK_EOF
-#define YY_NO_UNISTD_H 1
-#line 481 "lex.yy.c"
+#line 480 "scanner.cc"
 
 #define INITIAL 0
 
@@ -657,7 +656,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 34 "scanner.ll"
+#line 32 "scanner.ll"
 
 
 	typedef yy::izna_parser::token token;
@@ -665,7 +664,7 @@ YY_DECL
 	std::string string_buffer;
 
 
-#line 669 "lex.yy.c"
+#line 668 "scanner.cc"
 
 	if ( !(yy_init) )
 		{
@@ -724,12 +723,16 @@ yy_match:
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_current_state != 14 );
-		yy_cp = (yy_last_accepting_cpos);
-		yy_current_state = (yy_last_accepting_state);
+		while ( yy_base[yy_current_state] != 14 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
+		if ( yy_act == 0 )
+			{ /* have to back up */
+			yy_cp = (yy_last_accepting_cpos);
+			yy_current_state = (yy_last_accepting_state);
+			yy_act = yy_accept[yy_current_state];
+			}
 
 		YY_DO_BEFORE_ACTION;
 
@@ -747,53 +750,53 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 41 "scanner.ll"
+#line 39 "scanner.ll"
 return yy::izna_parser::token_type(yytext[0]);
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 43 "scanner.ll"
+#line 41 "scanner.ll"
 ;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 44 "scanner.ll"
+#line 42 "scanner.ll"
 {
 					errno = 0;
 					long n = strtol(yytext, NULL, 10);
 					if (n < LONG_MIN || n > LONG_MAX || errno == ERANGE)
 						driver.error("整数が範囲外です。");
 					yylval->value = n;
-					return token::TK_IVAL;
+					return token::TK_VALUE;
 				}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 52 "scanner.ll"
+#line 50 "scanner.ll"
 {
 					yylval->value = 0;
-					return token::TK_IVAL;
+					return token::TK_VALUE;
 				}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 56 "scanner.ll"
+#line 54 "scanner.ll"
 {
 					yylval->str = new std::string(yytext);
-					return token::TK_IDENTIFIER;
+					return token::TK_IDENT;
 				}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 60 "scanner.ll"
+#line 58 "scanner.ll"
 driver.error("この文字を識別子で使用することはできません。");
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 62 "scanner.ll"
+#line 60 "scanner.ll"
 ECHO;
 	YY_BREAK
-#line 797 "lex.yy.c"
+#line 800 "scanner.cc"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -860,8 +863,7 @@ case YY_STATE_EOF(INITIAL):
 
 			else
 				{
-				yy_cp = (yy_last_accepting_cpos);
-				yy_current_state = (yy_last_accepting_state);
+				yy_cp = (yy_c_buf_p);
 				goto yy_find_action;
 				}
 			}
@@ -1330,8 +1332,8 @@ static void yy_load_buffer_state  (void)
         b->yy_bs_column = 0;
     }
 
-        b->yy_is_interactive = 0;
-    
+	b->yy_is_interactive = 1;
+
 	errno = oerrno;
 }
 
@@ -1665,19 +1667,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 62 "scanner.ll"
+#line 60 "scanner.ll"
 
 
-
-void izna_driver::scan_begin()
-{
-	if ((yyin = fopen(file.c_str(), "r")) == 0)
-		error(file + " がオープンできません。");
-}
-
-void izna_driver::scan_end()
-{
-	fclose(yyin);
-	yylex_destroy();
-}
 

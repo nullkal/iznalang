@@ -33,13 +33,16 @@
    version 2.2 of Bison.  */
 
 
-#include "parser.tab.hh"
+#include "parser.hh"
 
 /* User implementation prologue.  */
+#line 22 "parser.yy"
+
+#include "driver.h"
 
 
 /* Line 317 of lalr1.cc.  */
-#line 43 "parser.tab.cc"
+#line 46 "parser.cc"
 
 #ifndef YY_
 # if defined YYENABLE_NLS && YYENABLE_NLS
@@ -196,15 +199,15 @@ namespace yy
 
     switch (yytype)
       {
-        case 4: /* "\"identifier\"" */
-#line 28 "parser.yy"
+        case 5: /* "\"identifier\"" */
+#line 33 "parser.yy"
 	{ delete (yyvaluep->str); };
-#line 203 "parser.tab.cc"
+#line 206 "parser.cc"
 	break;
-      case 15: /* "expr" */
-#line 29 "parser.yy"
+      case 19: /* "expr" */
+#line 34 "parser.yy"
 	{ delete (yyvaluep->expr); };
-#line 208 "parser.tab.cc"
+#line 211 "parser.cc"
 	break;
 
 	default:
@@ -393,59 +396,64 @@ namespace yy
     YY_REDUCE_PRINT (yyn);
     switch (yyn)
       {
-	  case 2:
-#line 39 "parser.yy"
-    { (yyval.expr) = new node(OP_PLUS, (yysemantic_stack_[(3) - (1)].expr), (yysemantic_stack_[(3) - (3)].expr)); ;}
-    break;
-
-  case 3:
-#line 40 "parser.yy"
-    { (yyval.expr) = new node(OP_MINUS, (yysemantic_stack_[(3) - (1)].expr), (yysemantic_stack_[(3) - (3)].expr)); ;}
-    break;
-
-  case 4:
-#line 41 "parser.yy"
-    { (yyval.expr) = new node(OP_MULTIPLY, (yysemantic_stack_[(3) - (1)].expr), (yysemantic_stack_[(3) - (3)].expr)); ;}
-    break;
-
-  case 5:
-#line 42 "parser.yy"
-    { (yyval.expr) = new node(OP_DIVIDE, (yysemantic_stack_[(3) - (1)].expr), (yysemantic_stack_[(3) - (3)].expr)); ;}
-    break;
-
-  case 6:
-#line 43 "parser.yy"
-    { (yyval.expr) = new node(OP_MODULO, (yysemantic_stack_[(3) - (1)].expr), (yysemantic_stack_[(3) - (3)].expr)); ;}
+	  case 6:
+#line 50 "parser.yy"
+    { printf("=> %d\n", (yysemantic_stack_[(2) - (1)].expr)->eval(&driver)); delete (yysemantic_stack_[(2) - (1)].expr); ;}
     break;
 
   case 7:
-#line 44 "parser.yy"
-    { (yyval.expr) = new node(OP_ASSIGN, (yysemantic_stack_[(3) - (1)].str), (yysemantic_stack_[(3) - (3)].expr)); ;}
+#line 53 "parser.yy"
+    { (yyval.expr) = new node(OP_PLUS, (yysemantic_stack_[(3) - (1)].expr), (yysemantic_stack_[(3) - (3)].expr)); ;}
     break;
 
   case 8:
-#line 45 "parser.yy"
-    { (yyval.expr) = new node(OP_NEG, (yysemantic_stack_[(2) - (2)].expr)); ;}
+#line 54 "parser.yy"
+    { (yyval.expr) = new node(OP_MINUS, (yysemantic_stack_[(3) - (1)].expr), (yysemantic_stack_[(3) - (3)].expr)); ;}
     break;
 
   case 9:
-#line 46 "parser.yy"
-    { (yyval.expr) = (yysemantic_stack_[(3) - (2)].expr) ;}
+#line 55 "parser.yy"
+    { (yyval.expr) = new node(OP_MULTIPLY, (yysemantic_stack_[(3) - (1)].expr), (yysemantic_stack_[(3) - (3)].expr)); ;}
     break;
 
   case 10:
-#line 47 "parser.yy"
-    { (yyval.expr) = new node(OP_VALUE, (yysemantic_stack_[(1) - (1)].str)); ;}
+#line 56 "parser.yy"
+    { (yyval.expr) = new node(OP_DIVIDE, (yysemantic_stack_[(3) - (1)].expr), (yysemantic_stack_[(3) - (3)].expr)); ;}
     break;
 
   case 11:
-#line 48 "parser.yy"
+#line 57 "parser.yy"
+    { (yyval.expr) = new node(OP_MODULO, (yysemantic_stack_[(3) - (1)].expr), (yysemantic_stack_[(3) - (3)].expr)); ;}
+    break;
+
+  case 12:
+#line 58 "parser.yy"
+    { (yyval.expr) = new node(OP_ASSIGN, (yysemantic_stack_[(3) - (1)].str), (yysemantic_stack_[(3) - (3)].expr)); ;}
+    break;
+
+  case 13:
+#line 59 "parser.yy"
+    { (yyval.expr) = new node(OP_NEG, (yysemantic_stack_[(2) - (2)].expr)); ;}
+    break;
+
+  case 14:
+#line 60 "parser.yy"
+    { (yyval.expr) = (yysemantic_stack_[(3) - (2)].expr) ;}
+    break;
+
+  case 15:
+#line 61 "parser.yy"
+    { (yyval.expr) = new node(OP_VALUE, (yysemantic_stack_[(1) - (1)].str)); ;}
+    break;
+
+  case 16:
+#line 62 "parser.yy"
     { (yyval.expr) = new node(OP_CONST, (yysemantic_stack_[(1) - (1)].value)); ;}
     break;
 
 
     /* Line 675 of lalr1.cc.  */
-#line 449 "parser.tab.cc"
+#line 457 "parser.cc"
 	default: break;
       }
     YY_SYMBOL_PRINT ("-> $$ =", yyr1_[yyn], &yyval, &yyloc);
@@ -652,13 +660,13 @@ namespace yy
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
      STATE-NUM.  */
-  const signed char izna_parser::yypact_ninf_ = -4;
+  const signed char izna_parser::yypact_ninf_ = -7;
   const signed char
   izna_parser::yypact_[] =
   {
-        14,    -4,    -1,    14,    14,     6,    14,    -4,    21,    -4,
-      14,    14,    14,    14,    14,    29,    -4,    15,    15,    -4,
-      -4,    -4
+        -7,     0,    -7,    -6,    -7,     4,    -2,    -7,    -2,    -7,
+      25,    -7,    -2,    -7,    16,    -2,    -2,    -2,    -2,    -2,
+      -7,    32,    -7,    19,    19,    -7,    -7,    -7
   };
 
   /* YYDEFACT[S] -- default rule to reduce with in state S when YYTABLE
@@ -667,23 +675,23 @@ namespace yy
   const unsigned char
   izna_parser::yydefact_[] =
   {
-         0,    11,    10,     0,     0,     0,     0,     8,     0,     1,
-       0,     0,     0,     0,     0,     7,     9,     2,     3,     4,
-       5,     6
+         2,     0,     1,     0,    16,    15,     0,     4,     0,     3,
+       0,     5,     0,    13,     0,     0,     0,     0,     0,     0,
+       6,    12,    14,     7,     8,     9,    10,    11
   };
 
   /* YYPGOTO[NTERM-NUM].  */
   const signed char
   izna_parser::yypgoto_[] =
   {
-        -4,    -3
+        -7,    -7,    -7,     3
   };
 
   /* YYDEFGOTO[NTERM-NUM].  */
   const signed char
   izna_parser::yydefgoto_[] =
   {
-        -1,     5
+        -1,     1,     9,    10
   };
 
   /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -693,20 +701,22 @@ namespace yy
   const unsigned char
   izna_parser::yytable_[] =
   {
-         7,     8,     0,    15,     6,     0,     9,    17,    18,    19,
-      20,    21,    10,    11,    12,    13,    14,     1,     2,     0,
-       0,     3,     0,    12,    13,    14,     4,    10,    11,    12,
-      13,    14,     0,     0,    16,    10,    11,    12,    13,    14
+         2,     3,     4,     5,     4,     5,     6,    11,     6,    13,
+      12,    14,     8,     7,     8,    21,     0,     0,    23,    24,
+      25,    26,    27,    15,    16,    17,    18,    19,    17,    18,
+      19,    22,    15,    16,    17,    18,    19,     0,    20,    15,
+      16,    17,    18,    19
   };
 
   /* YYCHECK.  */
   const signed char
   izna_parser::yycheck_[] =
   {
-         3,     4,    -1,     6,     5,    -1,     0,    10,    11,    12,
-      13,    14,     6,     7,     8,     9,    10,     3,     4,    -1,
-      -1,     7,    -1,     8,     9,    10,    12,     6,     7,     8,
-       9,    10,    -1,    -1,    13,     6,     7,     8,     9,    10
+         0,     1,     4,     5,     4,     5,     8,    13,     8,     6,
+       6,     8,    14,    13,    14,    12,    -1,    -1,    15,    16,
+      17,    18,    19,     7,     8,     9,    10,    11,     9,    10,
+      11,    15,     7,     8,     9,    10,    11,    -1,    13,     7,
+       8,     9,    10,    11
   };
 
   /* STOS_[STATE-NUM] -- The (internal number of the) accessing
@@ -714,9 +724,9 @@ namespace yy
   const unsigned char
   izna_parser::yystos_[] =
   {
-         0,     3,     4,     7,    12,    15,     5,    15,    15,     0,
-       6,     7,     8,     9,    10,    15,    13,    15,    15,    15,
-      15,    15
+         0,    17,     0,     1,     4,     5,     8,    13,    14,    18,
+      19,    13,     6,    19,    19,     7,     8,     9,    10,    11,
+      13,    19,    15,    19,    19,    19,    19,    19
   };
 
 #if YYDEBUG
@@ -725,8 +735,8 @@ namespace yy
   const unsigned short int
   izna_parser::yytoken_number_[] =
   {
-         0,   256,   257,   258,   259,    61,    43,    45,    42,    47,
-      37,   260,    40,    41
+         0,   256,   257,   258,   259,   260,    61,    43,    45,    42,
+      47,    37,   261,    10,    40,    41
   };
 #endif
 
@@ -734,16 +744,16 @@ namespace yy
   const unsigned char
   izna_parser::yyr1_[] =
   {
-         0,    14,    15,    15,    15,    15,    15,    15,    15,    15,
-      15,    15
+         0,    16,    17,    17,    18,    18,    18,    19,    19,    19,
+      19,    19,    19,    19,    19,    19,    19
   };
 
   /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
   const unsigned char
   izna_parser::yyr2_[] =
   {
-         0,     2,     3,     3,     3,     3,     3,     3,     2,     3,
-       1,     1
+         0,     2,     0,     2,     1,     2,     2,     3,     3,     3,
+       3,     3,     3,     2,     3,     1,     1
   };
 
 #if YYDEBUG || YYERROR_VERBOSE || YYTOKEN_TABLE
@@ -752,9 +762,9 @@ namespace yy
   const char*
   const izna_parser::yytname_[] =
   {
-    "\"end of file\"", "error", "$undefined", "\"value\"", "\"identifier\"",
-  "'='", "'+'", "'-'", "'*'", "'/'", "'%'", "NEG", "'('", "')'", "$accept",
-  "expr", 0
+    "\"end of file\"", "error", "$undefined", "TK_EOL", "\"value\"",
+  "\"identifier\"", "'='", "'+'", "'-'", "'*'", "'/'", "'%'", "NEG",
+  "'\\n'", "'('", "')'", "$accept", "input", "line", "expr", 0
   };
 #endif
 
@@ -763,10 +773,11 @@ namespace yy
   const izna_parser::rhs_number_type
   izna_parser::yyrhs_[] =
   {
-        15,     0,    -1,    15,     6,    15,    -1,    15,     7,    15,
-      -1,    15,     8,    15,    -1,    15,     9,    15,    -1,    15,
-      10,    15,    -1,     4,     5,    15,    -1,     7,    15,    -1,
-      12,    15,    13,    -1,     4,    -1,     3,    -1
+        17,     0,    -1,    -1,    17,    18,    -1,    13,    -1,     1,
+      13,    -1,    19,    13,    -1,    19,     7,    19,    -1,    19,
+       8,    19,    -1,    19,     9,    19,    -1,    19,    10,    19,
+      -1,    19,    11,    19,    -1,     5,     6,    19,    -1,     8,
+      19,    -1,    14,    19,    15,    -1,     5,    -1,     4,    -1
   };
 
   /* YYPRHS[YYN] -- Index of the first RHS symbol of rule number YYN in
@@ -774,16 +785,16 @@ namespace yy
   const unsigned char
   izna_parser::yyprhs_[] =
   {
-         0,     0,     3,     7,    11,    15,    19,    23,    27,    30,
-      34,    36
+         0,     0,     3,     4,     7,     9,    12,    15,    19,    23,
+      27,    31,    35,    39,    42,    46,    48
   };
 
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
   const unsigned char
   izna_parser::yyrline_[] =
   {
-         0,    39,    39,    40,    41,    42,    43,    44,    45,    46,
-      47,    48
+         0,    44,    44,    45,    48,    49,    50,    53,    54,    55,
+      56,    57,    58,    59,    60,    61,    62
   };
 
   // Print the state stack on the debug stream.
@@ -824,12 +835,12 @@ namespace yy
     translate_table[] =
     {
            0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+      13,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,    11,     2,     2,
+      14,    15,     9,     7,     2,     8,     2,    10,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,    10,     2,     2,
-      12,    13,     8,     6,     2,     7,     2,     9,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     5,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     6,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -849,7 +860,7 @@ namespace yy
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-      11
+       5,    12
     };
     if ((unsigned int) t <= yyuser_token_number_max_)
       return translate_table[t];
@@ -858,20 +869,20 @@ namespace yy
   }
 
   const int izna_parser::yyeof_ = 0;
-  const int izna_parser::yylast_ = 39;
-  const int izna_parser::yynnts_ = 2;
+  const int izna_parser::yylast_ = 43;
+  const int izna_parser::yynnts_ = 4;
   const int izna_parser::yyempty_ = -2;
-  const int izna_parser::yyfinal_ = 9;
+  const int izna_parser::yyfinal_ = 2;
   const int izna_parser::yyterror_ = 1;
   const int izna_parser::yyerrcode_ = 256;
-  const int izna_parser::yyntokens_ = 14;
+  const int izna_parser::yyntokens_ = 16;
 
-  const unsigned int izna_parser::yyuser_token_number_max_ = 260;
+  const unsigned int izna_parser::yyuser_token_number_max_ = 261;
   const izna_parser::token_number_type izna_parser::yyundef_token_ = 2;
 
 } // namespace yy
 
-#line 50 "parser.yy"
+#line 64 "parser.yy"
 
 
 void yy::izna_parser::error(

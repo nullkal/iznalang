@@ -4,6 +4,7 @@
 
 %{
 #include <string>
+#include "node.h"
 
 class izna_driver;
 %}
@@ -18,8 +19,12 @@ class izna_driver;
 	std::string *str;
 	node *expr;
 }
+%{
+#include "driver.h"
+%}
 
 %token         TK_EOF   0 "end of file"
+%token         TK_EOL
 %token <value> TK_VALUE   "value"
 %token <str>   TK_IDENT   "identifier"
 
@@ -34,7 +39,16 @@ class izna_driver;
 %left  NEG;
 
 %%
-%start expr;
+%start input;
+
+input:
+	 | input line
+	 ;
+
+line: '\n'
+	| error '\n'
+	| expr  '\n'              { printf("=> %d\n", $1->eval(&driver)); delete $1; }
+	;
 
 expr : expr '+' expr         { $$ = new node(OP_PLUS, $1, $3); }
 	 | expr '-' expr         { $$ = new node(OP_MINUS, $1, $3); }

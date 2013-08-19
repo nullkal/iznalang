@@ -51,12 +51,13 @@ namespace yy
 #line 5 "parser.yy"
 
 #include <string>
+#include "node.h"
 
 class izna_driver;
 
 
 /* Line 303 of lalr1.cc.  */
-#line 60 "parser.tab.hh"
+#line 61 "parser.hh"
 
 #include "location.hh"
 
@@ -107,14 +108,14 @@ namespace yy
     /// Symbol semantic values.
 #ifndef YYSTYPE
     union semantic_type
-#line 16 "parser.yy"
+#line 17 "parser.yy"
 {
 	int value;
 	std::string *str;
 	node *expr;
 }
 /* Line 303 of lalr1.cc.  */
-#line 118 "parser.tab.hh"
+#line 119 "parser.hh"
 	;
 #else
     typedef YYSTYPE semantic_type;
@@ -127,9 +128,10 @@ namespace yy
       /* Tokens.  */
    enum yytokentype {
      TK_EOF = 0,
-     TK_VALUE = 258,
-     TK_IDENT = 259,
-     NEG = 260
+     TK_EOL = 258,
+     TK_VALUE = 259,
+     TK_IDENT = 260,
+     NEG = 261
    };
 
     };
