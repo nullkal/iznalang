@@ -32,7 +32,7 @@ class izna_driver;
 %token <int>         TK_INTEGER      "integer"
 %token <std::string> TK_IDENTIFIER   "identifier"
 
-%type <std::unique_ptr<node>> expr
+%type <std::shared_ptr<node>> expr
 
 %right '='
 %left  '+' '-'
@@ -44,9 +44,9 @@ class izna_driver;
 program: compstmt opt_terms { $1->eval(); }
 	   ;
 
-compstmt:                     { $$ = std::unique_ptr<node>(nullptr); }
+compstmt:                     { $$ = std::make_shared<node>(nullptr); }
 		| stmt                { $$ = $1; }
-		| compstmt terms stmt { $$ = std::unique_ptr<node>(new node(OP_CONTINUE, $1, $3)); }
+		| compstmt terms stmt { $$ = std::make_shared<node>(new node(OP_CONTINUE, $1, $3)); }
 		;
 
 opt_terms: 
@@ -63,16 +63,16 @@ term: '\n'
 stmt: expr { $$ = $1; }
 	;
 
-expr : expr '+' expr         { $$ = std::unique_ptr<node>(OP_ADD     , $1, $3); }
-	 | expr '-' expr         { $$ = std::unique_ptr<node>(OP_SUBTRACT, $1, $3); }
-	 | expr '*' expr         { $$ = std::unique_ptr<node>(OP_MULTIPLY, $1, $3); }
-	 | expr '/' expr         { $$ = std::unique_ptr<node>(OP_DIVIDE  , $1, $3); }
-	 | expr '%' expr         { $$ = std::unique_ptr<node>(OP_MODULO  , $1, $3); }
-	 | "identifier" '=' expr { $$ = std::unique_ptr<node>(OP_ASSIGN  , $1, $3); }
-	 | '-' expr %prec NEG    { $$ = std::unique_ptr<node>(OP_NEG     , $1, $3); }
+expr : expr '+' expr         { $$ = std::make_shared<node>(OP_ADD     , $1, $3); }
+	 | expr '-' expr         { $$ = std::make_shared<node>(OP_SUBTRACT, $1, $3); }
+	 | expr '*' expr         { $$ = std::make_shared<node>(OP_MULTIPLY, $1, $3); }
+	 | expr '/' expr         { $$ = std::make_shared<node>(OP_DIVIDE  , $1, $3); }
+	 | expr '%' expr         { $$ = std::make_shared<node>(OP_MODULO  , $1, $3); }
+	 | "identifier" '=' expr { $$ = std::make_shared<node>(OP_ASSIGN  , $1, $3); }
+	 | '-' expr %prec NEG    { $$ = std:;make_shared<node>(OP_NEG     , $1, $3); }
 	 | '(' expr ')'          { $$ = $2; }
-	 | "identifier"          { $$ = std::unique_ptr<node>(OP_VALUE, $1); }
-	 | "value"               { $$ = std::unique_ptr<node>(OP_CONST, $1); }
+	 | "identifier"          { $$ = std::make_shared<node>(OP_VALUE, $1); }
+	 | "value"               { $$ = std::make_shared<node>(OP_CONST, $1); }
 	 ;
 
 %%
