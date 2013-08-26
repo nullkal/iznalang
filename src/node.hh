@@ -2,10 +2,7 @@
 #define IZNA_NODE_HH
 
 #include <string>
-#include <vector>
-#include <map>
-#include <functional>
-#include <algorithm>
+#include <memory>
 
 namespace izna {
 
