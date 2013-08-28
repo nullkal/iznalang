@@ -11,6 +11,10 @@ std::unordered_map<std::string, int> var_table;
 
 int eval_tree(std::shared_ptr<node> node)
 {
+	if (!node) {
+		return 0;
+	}
+
 	switch (node->m_op)
 	{
 	case OP_ADD:
@@ -43,6 +47,15 @@ int eval_tree(std::shared_ptr<node> node)
 	case OP_CONTINUE:
 		eval_tree(node->m_left);
 		return eval_tree(node->m_right);
+	
+	case OP_IF:
+		if (eval_tree(node->m_cond))
+		{
+			return eval_tree(node->m_left);
+		} else
+		{
+			return eval_tree(node->m_right);
+		}
 	}
 	return 0;
 }
