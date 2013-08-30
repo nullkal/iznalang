@@ -27,7 +27,8 @@ enum {
 	OP_CONTINUE,
 	OP_IF,
 	OP_WHILE,
-	OP_NEXT
+	OP_NEXT,
+	OP_BREAK
 };
 
 class node 

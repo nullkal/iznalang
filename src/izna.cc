@@ -2,12 +2,16 @@
 #include <iterator>
 #include <sstream>
 #include <unordered_map>
+#include <stdexcept>
 
 #include "parser.hh"
 
 namespace izna {
 
 std::unordered_map<std::string, int> var_table;
+
+class break_stmt: public std::exception {};
+class next_stmt : public std::exception {};
 
 int eval_tree(std::shared_ptr<node> node)
 {
@@ -69,12 +73,8 @@ int eval_tree(std::shared_ptr<node> node)
 		return node->m_value;
 
 	case OP_CONTINUE:
-		if (node->m_left->m_op != OP_NEXT)
-		{
-			eval_tree(node->m_left);
-			return eval_tree(node->m_right);
-		}
-		return 0;
+		eval_tree(node->m_left);
+		return eval_tree(node->m_right);
 	
 	case OP_IF:
 		if (eval_tree(node->m_cond))
@@ -85,12 +85,25 @@ int eval_tree(std::shared_ptr<node> node)
 			return eval_tree(node->m_right);
 		}
 
+	case OP_NEXT:
+		throw next_stmt();
+
+	case OP_BREAK:
+		throw break_stmt();
+
 	case OP_WHILE:
 		{
 			int val = 0;
 			while (eval_tree(node->m_cond))
 			{
-				val = eval_tree(node->m_left);
+				try {
+					val = eval_tree(node->m_left);
+				} catch (next_stmt)
+				{
+				} catch (break_stmt)
+				{
+					break;
+				}
 			}
 			return val;
 		}

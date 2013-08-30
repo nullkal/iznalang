@@ -72,6 +72,7 @@ parser::token_type yylex(
 
 %token               WHILE        "while"
 %token               NEXT         "next"
+%token               BREAK        "break"
 
 
 %type  <std::shared_ptr<node>>  compstmt
@@ -86,6 +87,7 @@ parser::token_type yylex(
 
 %type  <std::shared_ptr<node>>  while_stmt
 %type  <std::shared_ptr<node>>  next_stmt
+%type  <std::shared_ptr<node>>  break_stmt
 
 
 %right '='
@@ -122,6 +124,7 @@ stmt: expr       { $$ = $1; }
 	| if_stmt    { $$ = $1; }
 	| while_stmt { $$ = $1; }
 	| next_stmt  { $$ = $1; }
+	| break_stmt  { $$ = $1; }
 	;
 
 expr : expr '+' expr         { $$ = std::make_shared<node>(OP_ADD        , $1, $3); }
@@ -185,7 +188,10 @@ while_stmt: WHILE expr term compstmt term END
 		  ;
 
 next_stmt: NEXT { $$ = std::make_shared<node>(OP_NEXT); }
+		 ;
 
+break_stmt: BREAK { $$ = std::make_shared<node>(OP_BREAK); }
+		  ;
 
 %%
 
@@ -393,6 +399,11 @@ if (chk.DiscardIfInputIs("<"))
 	if (chk.DiscardIfInputIs("next"))
 	{
 		return parser::token::NEXT;
+	}
+
+	if (chk.DiscardIfInputIs("break"))
+	{
+		return parser::token::BREAK;
 	}
 
 	if ((c = chk.ReadIfInputSatisfies(isalpha)) || (c = chk.ReadIfInputIs('_')))
