@@ -165,7 +165,12 @@ opt_elsifs: { $$ = nullptr; }
 		  | opt_elsifs elsif {
 				if ($1)
 				{
-					$1->m_right = $2;
+					auto cur_node = $1;
+					while(cur_node->m_right)
+					{
+						cur_node = cur_node->m_right;
+					}
+					cur_node->m_right = $2;
 					$$ = $1;
 				} else {
 					$$ = $2;
@@ -173,7 +178,8 @@ opt_elsifs: { $$ = nullptr; }
 			}
 		  ;
 
-elsif: ELSIF expr term compstmt terms { $$ = std::make_shared<node>(OP_IF, $4, nullptr, $2); }
+elsif: ELSIF expr term compstmt terms
+	   { $$ = std::make_shared<node>(OP_IF, $4, nullptr, $2); }
 	 ;
 
 opt_else: { $$ = nullptr; }
