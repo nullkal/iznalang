@@ -51,12 +51,28 @@ parser::token_type yylex(
 %}
 
 %token               TK_EOF     0 "end of file"
+
 %token <std::string> IDENTIFIER   "identifier"
 %token <int>         NUMBER       "number"
+
+%token               EQ           "=="
+%token               NE           "!="
+%token               LESS         "<"
+%token               LESS_EQ      "<="
+%token               GREATER      ">"
+%token               GREATER_EQ   ">="
+%token               LOGICAL_OR   "||"
+%token               LOGICAL_AND  "&&"
+
+%token               END          "end"
+
 %token               IF           "if statement"
 %token               ELSIF        "elsif"
 %token               ELSE         "else"
-%token               END          "end"
+
+%token               WHILE        "while"
+%token               NEXT         "next"
+
 
 %type  <std::shared_ptr<node>>  compstmt
 %type  <std::shared_ptr<node>>  stmt
@@ -68,7 +84,14 @@ parser::token_type yylex(
 %type  <std::shared_ptr<node>>  opt_else
 %type  <std::shared_ptr<node>>  else
 
+%type  <std::shared_ptr<node>>  while_stmt
+%type  <std::shared_ptr<node>>  next_stmt
+
+
 %right '='
+%left  LOGICAL_OR
+%left  LOGICAL_AND
+%left  EQ NE LESS LESS_EQ GREATER GREATER_EQ
 %left  '+' '-'
 %left  '*' '/' '%'
 %left  NEG
@@ -92,19 +115,30 @@ terms: term
 	 ;
 
 term: '\n'
+	| ';'
 	;
 
-stmt: expr { $$ = $1; }
-	| if_stmt { $$ = $1; }
+stmt: expr       { $$ = $1; }
+	| if_stmt    { $$ = $1; }
+	| while_stmt { $$ = $1; }
+	| next_stmt  { $$ = $1; }
 	;
 
-expr : expr '+' expr         { $$ = std::make_shared<node>(OP_ADD     , $1, $3); }
-	 | expr '-' expr         { $$ = std::make_shared<node>(OP_SUBTRACT, $1, $3); }
-	 | expr '*' expr         { $$ = std::make_shared<node>(OP_MULTIPLY, $1, $3); }
-	 | expr '/' expr         { $$ = std::make_shared<node>(OP_DIVIDE  , $1, $3); }
-	 | expr '%' expr         { $$ = std::make_shared<node>(OP_MODULO  , $1, $3); }
-	 | "identifier" '=' expr { $$ = std::make_shared<node>(OP_ASSIGN  , $1, $3); }
-	 | '-' expr %prec NEG    { $$ = std::make_shared<node>(OP_NEG     , $2); }
+expr : expr '+' expr         { $$ = std::make_shared<node>(OP_ADD        , $1, $3); }
+	 | expr '-' expr         { $$ = std::make_shared<node>(OP_SUBTRACT   , $1, $3); }
+	 | expr '*' expr         { $$ = std::make_shared<node>(OP_MULTIPLY   , $1, $3); }
+	 | expr '/' expr         { $$ = std::make_shared<node>(OP_DIVIDE     , $1, $3); }
+	 | expr '%' expr         { $$ = std::make_shared<node>(OP_MODULO     , $1, $3); }
+	 | expr LOGICAL_OR  expr { $$ = std::make_shared<node>(OP_LOGICAL_OR , $1, $3); }
+	 | expr LOGICAL_AND expr { $$ = std::make_shared<node>(OP_LOGICAL_AND, $1, $3); }
+	 | expr EQ expr          { $$ = std::make_shared<node>(OP_EQ         , $1, $3); }
+	 | expr NE expr          { $$ = std::make_shared<node>(OP_NE         , $1, $3); }
+	 | expr LESS    expr     { $$ = std::make_shared<node>(OP_LESS       , $1, $3); }
+	 | expr LESS_EQ expr     { $$ = std::make_shared<node>(OP_LESS_EQ    , $1, $3); }
+	 | expr GREATER    expr  { $$ = std::make_shared<node>(OP_GREATER    , $1, $3); }
+	 | expr GREATER_EQ expr  { $$ = std::make_shared<node>(OP_GREATER_EQ , $1, $3); }
+	 | "identifier" '=' expr { $$ = std::make_shared<node>(OP_ASSIGN     , $1, $3); }
+	 | '-' expr %prec NEG    { $$ = std::make_shared<node>(OP_NEG        , $2); }
 	 | '(' expr ')'          { $$ = $2; }
 	 | "identifier"          { $$ = std::make_shared<node>(OP_VALUE, $1); }
 	 | "number"              { $$ = std::make_shared<node>(OP_CONST, $1); }
@@ -145,6 +179,13 @@ opt_else: { $$ = nullptr; }
 
 else: ELSE term compstmt terms { $$ = $3; }
 	;
+
+while_stmt: WHILE expr term compstmt term END
+		    { $$ = std::make_shared<node>(OP_WHILE, $4, nullptr, $2); }
+		  ;
+
+next_stmt: NEXT { $$ = std::make_shared<node>(OP_NEXT); }
+
 
 %%
 
@@ -284,24 +325,74 @@ parser::token_type yylex(
 		return parser::token::NUMBER;
 	}
 
-		if (chk.DiscardIfInputIs("if"))
+	if (chk.DiscardIfInputIs("||"))
+	{
+		return parser::token::LOGICAL_OR;
+	}
+
+	if (chk.DiscardIfInputIs("&&"))
+	{
+		return parser::token::LOGICAL_AND;
+	}
+
+	if (chk.DiscardIfInputIs("=="))
+	{
+		return parser::token::EQ;
+	}
+
+	if (chk.DiscardIfInputIs("!="))
+	{
+		return parser::token::NE;
+	}
+
+		if (chk.DiscardIfInputIs("<="))
+	{
+		return parser::token::LESS_EQ;
+	}
+
+if (chk.DiscardIfInputIs("<"))
+	{
+		return parser::token::LESS;
+	}
+
+	if (chk.DiscardIfInputIs(">="))
+	{
+		return parser::token::GREATER_EQ;
+	}
+
+	if (chk.DiscardIfInputIs(">"))
+	{
+		return parser::token::GREATER;
+	}
+
+	if (chk.DiscardIfInputIs("end"))
+	{
+	return parser::token::END;
+	}
+
+	if (chk.DiscardIfInputIs("if"))
 	{
 		return parser::token::IF;
 	}
 
 	if (chk.DiscardIfInputIs("elsif"))
 	{
-	return parser::token::ELSIF;
+		return parser::token::ELSIF;
 	}
 
 	if (chk.DiscardIfInputIs("else"))
 	{
-	return parser::token::ELSE;
+		return parser::token::ELSE;
 	}
 
-	if (chk.DiscardIfInputIs("end"))
+	if (chk.DiscardIfInputIs("while"))
 	{
-	return parser::token::END;
+		return parser::token::WHILE;
+	}
+
+	if (chk.DiscardIfInputIs("next"))
+	{
+		return parser::token::NEXT;
 	}
 
 	if ((c = chk.ReadIfInputSatisfies(isalpha)) || (c = chk.ReadIfInputIs('_')))

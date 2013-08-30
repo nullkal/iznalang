@@ -32,6 +32,30 @@ int eval_tree(std::shared_ptr<node> node)
 	case OP_MODULO:
 		return eval_tree(node->m_left) % eval_tree(node->m_right);
 
+	case OP_LOGICAL_OR:
+		return eval_tree(node->m_left) || eval_tree(node->m_right);
+
+	case OP_LOGICAL_AND:
+		return eval_tree(node->m_left) && eval_tree(node->m_right);
+
+	case OP_EQ:
+		return eval_tree(node->m_left) == eval_tree(node->m_right);
+
+	case OP_NE:
+		return eval_tree(node->m_left) != eval_tree(node->m_right);
+
+	case OP_LESS:
+		return eval_tree(node->m_left) < eval_tree(node->m_right);
+
+	case OP_LESS_EQ:
+		return eval_tree(node->m_left) <= eval_tree(node->m_right);
+
+	case OP_GREATER:
+		return eval_tree(node->m_left) > eval_tree(node->m_right);
+
+	case OP_GREATER_EQ:
+		return eval_tree(node->m_left) >= eval_tree(node->m_right);
+
 	case OP_ASSIGN:
 		return var_table[node->m_string] = eval_tree(node->m_right);
 
@@ -45,8 +69,12 @@ int eval_tree(std::shared_ptr<node> node)
 		return node->m_value;
 
 	case OP_CONTINUE:
-		eval_tree(node->m_left);
-		return eval_tree(node->m_right);
+		if (node->m_left->m_op != OP_NEXT)
+		{
+			eval_tree(node->m_left);
+			return eval_tree(node->m_right);
+		}
+		return 0;
 	
 	case OP_IF:
 		if (eval_tree(node->m_cond))
@@ -55,6 +83,16 @@ int eval_tree(std::shared_ptr<node> node)
 		} else
 		{
 			return eval_tree(node->m_right);
+		}
+
+	case OP_WHILE:
+		{
+			int val = 0;
+			while (eval_tree(node->m_cond))
+			{
+				val = eval_tree(node->m_left);
+			}
+			return val;
 		}
 	}
 	return 0;

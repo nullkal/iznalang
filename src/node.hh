@@ -14,10 +14,20 @@ enum {
 	OP_MODULO,
 	OP_ASSIGN,
 	OP_NEG,
+	OP_LOGICAL_OR,
+	OP_LOGICAL_AND,
+	OP_EQ,
+	OP_NE,
+	OP_LESS,
+	OP_LESS_EQ,
+	OP_GREATER,
+	OP_GREATER_EQ,
 	OP_VALUE,
 	OP_CONST,
 	OP_CONTINUE,
-	OP_IF
+	OP_IF,
+	OP_WHILE,
+	OP_NEXT
 };
 
 class node 
@@ -25,7 +35,7 @@ class node
 public:
 	node(
 		int op,
-		std::shared_ptr<node> left,
+		std::shared_ptr<node> left  = nullptr,
 		std::shared_ptr<node> right = nullptr,
 		std::shared_ptr<node> cond  = nullptr):
 			m_op(op), m_value(0), m_string(), m_left(left), m_right(right), m_cond(cond)
