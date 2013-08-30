@@ -1,0 +1,15 @@
+num = 0
+
+i = 0
+while i < 100
+	j = 0
+	while j < 100
+		if j == 50
+			break
+		end
+		num = num + 1
+		j = j + 1
+	end
+	i = i + 1
+end
+
