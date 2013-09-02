@@ -5,15 +5,18 @@
 #include <stdexcept>
 
 #include "parser.hh"
+#include "value.hh"
+#include "boolean.hh"
+#include "exception.hh"
 
 namespace izna {
 
-std::unordered_map<std::string, int> var_table;
+std::unordered_map<std::string, std::shared_ptr<value>> var_table;
 
 class break_stmt: public std::exception {};
 class next_stmt : public std::exception {};
 
-int eval_tree(std::shared_ptr<node> node)
+std::shared_ptr<value> eval_tree(std::shared_ptr<node> node)
 {
 	if (!node) {
 		return 0;
@@ -22,49 +25,49 @@ int eval_tree(std::shared_ptr<node> node)
 	switch (node->m_op)
 	{
 	case OP_ADD:
-		return eval_tree(node->m_left) + eval_tree(node->m_right);
+		return eval_tree(node->m_left)->Add(eval_tree(node->m_right));
 
 	case OP_SUBTRACT:
-		return eval_tree(node->m_left) - eval_tree(node->m_right);
+		return eval_tree(node->m_left)->Subtract(eval_tree(node->m_right));
 
 	case OP_MULTIPLY:
-		return eval_tree(node->m_left) * eval_tree(node->m_right);
+		return eval_tree(node->m_left)->Multiply(eval_tree(node->m_right));
 
 	case OP_DIVIDE:
-		return eval_tree(node->m_left) / eval_tree(node->m_right);
+		return eval_tree(node->m_left)->Divide(eval_tree(node->m_right));
 
 	case OP_MODULO:
-		return eval_tree(node->m_left) % eval_tree(node->m_right);
+		return eval_tree(node->m_left)->Modulo(eval_tree(node->m_right));
 
 	case OP_LOGICAL_OR:
-		return eval_tree(node->m_left) || eval_tree(node->m_right);
+		return eval_tree(node->m_left)->LogicalOr(eval_tree(node->m_right));
 
 	case OP_LOGICAL_AND:
-		return eval_tree(node->m_left) && eval_tree(node->m_right);
+		return eval_tree(node->m_left)->LogicalAnd(eval_tree(node->m_right));
 
 	case OP_EQ:
-		return eval_tree(node->m_left) == eval_tree(node->m_right);
+		return eval_tree(node->m_left)->Eq(eval_tree(node->m_right));
 
 	case OP_NE:
-		return eval_tree(node->m_left) != eval_tree(node->m_right);
+		return eval_tree(node->m_left)->Ne(eval_tree(node->m_right));
 
 	case OP_LESS:
-		return eval_tree(node->m_left) < eval_tree(node->m_right);
+		return eval_tree(node->m_left)->Less(eval_tree(node->m_right));
 
 	case OP_LESS_EQ:
-		return eval_tree(node->m_left) <= eval_tree(node->m_right);
+		return eval_tree(node->m_left)->LessEq(eval_tree(node->m_right));
 
 	case OP_GREATER:
-		return eval_tree(node->m_left) > eval_tree(node->m_right);
+		return eval_tree(node->m_left)->Greater(eval_tree(node->m_right));
 
 	case OP_GREATER_EQ:
-		return eval_tree(node->m_left) >= eval_tree(node->m_right);
+		return eval_tree(node->m_left)->GreaterEq(eval_tree(node->m_right));
 
 	case OP_ASSIGN:
 		return var_table[node->m_string] = eval_tree(node->m_right);
 
 	case OP_NEG:
-		return -eval_tree(node->m_left);
+		return eval_tree(node->m_left)->Neg();
 
 	case OP_VALUE:
 		return var_table[node->m_string];
@@ -77,12 +80,22 @@ int eval_tree(std::shared_ptr<node> node)
 		return eval_tree(node->m_right);
 	
 	case OP_IF:
-		if (eval_tree(node->m_cond))
 		{
-			return eval_tree(node->m_left);
-		} else
-		{
-			return eval_tree(node->m_right);
+			auto result = eval_tree(node->m_cond);
+
+			auto casted_result = std::dynamic_pointer_cast<boolean>(result);
+			if (!casted_result)
+			{
+				throw type_error();
+			}
+
+			if (casted_result->m_value)
+			{
+				return eval_tree(node->m_left);
+			} else
+			{
+				return eval_tree(node->m_right);
+			}
 		}
 
 	case OP_NEXT:
@@ -93,9 +106,22 @@ int eval_tree(std::shared_ptr<node> node)
 
 	case OP_WHILE:
 		{
-			int val = 0;
-			while (eval_tree(node->m_cond))
+			std::shared_ptr<value> val = 0;
+			for(;;)
 			{
+				auto result = eval_tree(node->m_cond);
+
+				auto casted_result = std::dynamic_pointer_cast<boolean>(result);
+				if (!casted_result)
+				{
+					throw type_error();
+				}
+
+				if (!casted_result->m_value)
+				{
+					break;
+				}
+
 				try {
 					val = eval_tree(node->m_left);
 				} catch (next_stmt)
@@ -128,7 +154,7 @@ int main(int argc, char *argv[])
 	izna::eval_tree(params.root);
 	for (auto &it: izna::var_table)
 	{
-		std::cout << it.first << ": " << it.second << std::endl;
+		std::cout << it.first << ": " << it.second->ToString() << std::endl;
 	}
 
 	return 0;

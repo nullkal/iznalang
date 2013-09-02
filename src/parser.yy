@@ -39,6 +39,7 @@ struct parser_params
 #include <boost/optional.hpp>
 
 #include "parser.hh"
+#include "integer.hh"
 
 namespace izna {
 
@@ -144,7 +145,7 @@ expr : expr '+' expr         { $$ = std::make_shared<node>(OP_ADD        , $1, $
 	 | '-' expr %prec NEG    { $$ = std::make_shared<node>(OP_NEG        , $2); }
 	 | '(' expr ')'          { $$ = $2; }
 	 | "identifier"          { $$ = std::make_shared<node>(OP_VALUE, $1); }
-	 | "number"              { $$ = std::make_shared<node>(OP_CONST, $1); }
+	 | "number"              { $$ = std::make_shared<node>(OP_CONST, std::make_shared<integer>($1)); }
 	 ;
 
 if_stmt: IF expr term compstmt term opt_elsifs opt_else END {

@@ -8,6 +8,12 @@ BISON_TARGET(IznaParser parser.yy ${CMAKE_CURRENT_BINARY_DIR}/parser.cc)
 SET(SRCS
 	node.hh
 	izna.cc
+	value.hh
+	integer.hh
+	integer.cc
+	boolean.hh
+	boolean.cc
+	exception.hh
 	${BISON_IznaParser_OUTPUTS})
 
 ADD_EXECUTABLE(izna ${SRCS})

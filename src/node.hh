@@ -4,6 +4,8 @@
 #include <string>
 #include <memory>
 
+#include "value.hh"
+
 namespace izna {
 
 enum {
@@ -42,8 +44,8 @@ public:
 			m_op(op), m_value(0), m_string(), m_left(left), m_right(right), m_cond(cond)
 	{}
 
-	node(int op, int value):
-		m_op(op), m_value(value), m_string(), m_left(nullptr), m_right(nullptr), m_cond(nullptr)
+	node(int op, std::shared_ptr<value> v):
+		m_op(op), m_value(v), m_string(), m_left(nullptr), m_right(nullptr), m_cond(nullptr)
 	{}
 
 	node(int op, std::string str, std::shared_ptr<node> right = nullptr):
@@ -51,7 +53,7 @@ public:
 	{}
 
 	int m_op;
-	int m_value;
+	std::shared_ptr<value> m_value;
 	std::string m_string;
 	std::shared_ptr<node> m_left;
 	std::shared_ptr<node> m_right;
