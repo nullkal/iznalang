@@ -1,0 +1,45 @@
+# A typical solution of what is called Fizz-Buzz.
+
+result = ""
+
+num = 1
+while num <=100
+  if num % 15 == 0
+    result = result + "FizzBuzz\n"
+  elsif num % 3 == 0
+    result = result + "Fizz\n"
+  elsif num % 5 == 0
+    result = result + "Buzz\n"
+  else
+    num_text = ""
+    temp_num = num
+    while temp_num != 0
+      if temp_num % 10 == 0
+        num_text = "0" + num_text
+      elsif temp_num % 10 == 1
+        num_text = "1" + num_text
+      elsif temp_num % 10 == 2
+        num_text = "2" + num_text
+      elsif temp_num % 10 == 3
+        num_text = "3" + num_text
+      elsif temp_num % 10 == 4
+        num_text = "4" + num_text
+      elsif temp_num % 10 == 5
+        num_text = "5" + num_text
+      elsif temp_num % 10 == 6
+        num_text = "6" + num_text
+      elsif temp_num % 10 == 7
+        num_text = "7" + num_text
+      elsif temp_num % 10 == 8
+        num_text = "8" + num_text
+      elsif temp_num % 10 == 9
+        num_text = "9" + num_text
+      end
+      temp_num = temp_num / 10
+    end
+
+    result = result + num_text + "\n"
+  end
+  num = num + 1
+end
+
