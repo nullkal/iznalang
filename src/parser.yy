@@ -12,13 +12,24 @@
 
 namespace izna {
 
+enum class lex_state
+{
+	BEGIN,
+	COMMENT
+};
+
 struct parser_params
 {
 	explicit parser_params(const char *input, size_t size):
-		root(nullptr), input(input), inputBegin(input), inputEnd(input + size)
+		root(nullptr),
+		state(lex_state::BEGIN),
+		input(input),
+		inputBegin(input),
+		inputEnd(input + size)
 	{}
 
 	std::shared_ptr<node> root;
+	lex_state state;
 
 	const char *input;
 	const char *inputBegin;
@@ -37,9 +48,11 @@ struct parser_params
 #include <string>
 #include <cstring>
 #include <boost/optional.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "parser.hh"
 #include "integer.hh"
+#include "real.hh"
 
 namespace izna {
 
@@ -54,7 +67,8 @@ parser::token_type yylex(
 %token               TK_EOF     0 "end of file"
 
 %token <std::string> IDENTIFIER   "identifier"
-%token <int>         NUMBER       "number"
+%token <int>         INTEGER      "integer"
+%token <double>      REAL         "real"
 
 %token               EQ           "=="
 %token               NE           "!="
@@ -145,7 +159,8 @@ expr : expr '+' expr         { $$ = std::make_shared<node>(OP_ADD        , $1, $
 	 | '-' expr %prec NEG    { $$ = std::make_shared<node>(OP_NEG        , $2); }
 	 | '(' expr ')'          { $$ = $2; }
 	 | "identifier"          { $$ = std::make_shared<node>(OP_VALUE, $1); }
-	 | "number"              { $$ = std::make_shared<node>(OP_CONST, std::make_shared<integer>($1)); }
+	 | "integer"             { $$ = std::make_shared<node>(OP_CONST, std::make_shared<integer>($1)); }
+	 | "real"                { $$ = std::make_shared<node>(OP_CONST, std::make_shared<real>($1)); }
 	 ;
 
 if_stmt: IF expr term compstmt term opt_elsifs opt_else END {
@@ -323,19 +338,65 @@ parser::token_type yylex(
 	if (chk.ReadIfInputIs('0') && !chk.ReadIfInputIsIn('0', '9', false))
 	{
 		yylval->build<int>() = 0;
-		return parser::token::NUMBER;
+		return parser::token::INTEGER;
 	}
 
 	if (c = chk.ReadIfInputIsIn('1', '9'))
 	{
-		int num = *c - '0';
-		while (c = chk.ReadIfInputIsIn('0', '9'))
+		std::string buf;
+		buf.append(1, *c);
+		
+		bool appeared_point = false;
+		bool appeared_exp   = false;
+		for (;;)
 		{
-			num = num * 10 + (*c - '0');
+			if (c = chk.ReadIfInputIsIn('0', '9'))
+			{
+				buf.append(1, *c);
+			} else if (c = chk.ReadIfInputIs('.', false))
+			{
+				if (appeared_point || appeared_exp)
+				{
+					break;
+				}
+				appeared_point = true;
+
+				buf.append(1, *c);
+				++params.input;
+			} else if ((c = chk.ReadIfInputIs('e', false)) || (c = chk.ReadIfInputIs('E', false)))
+			{
+				if (appeared_exp)
+				{
+					break;
+				}
+				appeared_exp = true;
+
+				buf.append(1, *c);
+				++params.input;
+
+				if ((c = chk.ReadIfInputIs('+')) || (c = chk.ReadIfInputIs('-')))
+				{
+					buf.append(1, *c);
+				} else
+				{
+					// TODO: implement notifying about the erroneous notation of floating number.
+					break;
+				}
+			} else
+			{
+				break;
+			}
 		}
 
-		yylval->build<int>() = num;
-		return parser::token::NUMBER;
+		if (appeared_point || appeared_exp)
+		{
+			yylval->build<double>() = boost::lexical_cast<double>(buf);
+			return parser::token::REAL;
+		} else
+		{
+			yylval->build<int>() = boost::lexical_cast<int>(buf);
+			return parser::token::INTEGER;
+		}
 	}
 
 	if (chk.DiscardIfInputIs("||"))
@@ -358,12 +419,12 @@ parser::token_type yylex(
 		return parser::token::NE;
 	}
 
-		if (chk.DiscardIfInputIs("<="))
+	if (chk.DiscardIfInputIs("<="))
 	{
 		return parser::token::LESS_EQ;
 	}
 
-if (chk.DiscardIfInputIs("<"))
+	if (chk.DiscardIfInputIs("<"))
 	{
 		return parser::token::LESS;
 	}
