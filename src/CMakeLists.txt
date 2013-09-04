@@ -15,6 +15,8 @@ SET(SRCS
 	integer.cc
 	real.hh
 	real.cc
+	string.hh
+	string.cc
 	exception.hh
 	${BISON_IznaParser_OUTPUTS})
 

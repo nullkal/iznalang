@@ -53,6 +53,7 @@ struct parser_params
 #include "parser.hh"
 #include "integer.hh"
 #include "real.hh"
+#include "string.hh"
 
 namespace izna {
 
@@ -69,6 +70,7 @@ parser::token_type yylex(
 %token <std::string> IDENTIFIER   "identifier"
 %token <int>         INTEGER      "integer"
 %token <double>      REAL         "real"
+%token <std::string> STRING       "string"
 
 %token               EQ           "=="
 %token               NE           "!="
@@ -161,6 +163,7 @@ expr : expr '+' expr         { $$ = std::make_shared<node>(OP_ADD        , $1, $
 	 | "identifier"          { $$ = std::make_shared<node>(OP_VALUE, $1); }
 	 | "integer"             { $$ = std::make_shared<node>(OP_CONST, std::make_shared<integer>($1)); }
 	 | "real"                { $$ = std::make_shared<node>(OP_CONST, std::make_shared<real>($1)); }
+	 | "string"              { $$ = std::make_shared<node>(OP_CONST, std::make_shared<string>($1)); }
 	 ;
 
 if_stmt: IF expr term compstmt term opt_elsifs opt_else END {
@@ -397,6 +400,43 @@ parser::token_type yylex(
 			yylval->build<int>() = boost::lexical_cast<int>(buf);
 			return parser::token::INTEGER;
 		}
+	}
+
+	if (c = chk.ReadIfInputIs('"'))
+	{
+		std::string buf;
+		for (;;)
+		{
+			if (c = chk.ReadIfInputIs('"'))
+			{
+				break;
+			} else if (c = chk.ReadIfInputIs('\\'))
+			{
+				switch (*chk.Read())
+				{
+				case 'n':
+					buf.append(1, '\n');
+					break;
+				case '"':
+					buf.append(1, '"');
+					break;
+				default:
+					// TODO: dispatch an error, or at least notify a warning
+					break;
+				}
+			} else if (c = chk.ReadIfInputIs('\n'))
+			{
+				// TODO: dispatch an error
+				break;
+			} else
+			{
+				c = chk.Read();
+				buf.append(1, *c);
+			}
+		}
+
+		yylval->build<std::string>() = buf;
+		return parser::token::STRING;
 	}
 
 	if (chk.DiscardIfInputIs("||"))
