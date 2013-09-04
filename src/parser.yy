@@ -338,6 +338,14 @@ parser::token_type yylex(
 
 	while (chk.ReadIfInputIs(' ') || chk.ReadIfInputIs('\t'));
 
+	if (chk.ReadIfInputIs('#'))
+	{
+		while (!chk.ReadIfInputIs('\n', false))
+		{
+			++params.input;
+		}
+	}
+
 	if (chk.ReadIfInputIs('0') && !chk.ReadIfInputIsIn('0', '9', false))
 	{
 		yylval->build<int>() = 0;
