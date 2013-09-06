@@ -160,7 +160,7 @@ std::shared_ptr<value> integer::GreaterEq(std::shared_ptr<value> rhs) const
 
 std::shared_ptr<value> integer::Neg() const
 {
-	return std::make_shared<boolean>(-m_value);
+	return std::make_shared<integer>(-m_value);
 }
 
 } //izna

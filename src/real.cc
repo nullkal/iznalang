@@ -153,7 +153,7 @@ std::shared_ptr<value> real::GreaterEq(std::shared_ptr<value> rhs) const
 
 std::shared_ptr<value> real::Neg() const
 {
-	return std::make_shared<boolean>(-m_value);
+	return std::make_shared<real>(-m_value);
 }
 
 } //izna
