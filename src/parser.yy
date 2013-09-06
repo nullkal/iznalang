@@ -252,7 +252,7 @@ opt_args:      { $$ = nullptr; }
 		;
 
 args: expr          { $$ = std::make_shared<node>(OP_ARG, $1); }
-	| args ',' expr { $$ = std::make_shared<node>(OP_ARG, $1, $3); }
+	| expr ',' args { $$ = std::make_shared<node>(OP_ARG, $1, $3); }
 	;
 
 %%
