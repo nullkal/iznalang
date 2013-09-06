@@ -54,6 +54,7 @@ struct parser_params
 #include "integer.hh"
 #include "real.hh"
 #include "string.hh"
+#include "func.hh"
 
 namespace izna {
 
@@ -83,6 +84,8 @@ parser::token_type yylex(
 
 %token               END          "end"
 
+%token               DO           "do"
+
 %token               IF           "if statement"
 %token               ELSIF        "elsif"
 %token               ELSE         "else"
@@ -96,6 +99,8 @@ parser::token_type yylex(
 %type  <std::shared_ptr<node>>  stmt
 %type  <std::shared_ptr<node>>  expr
 
+%type  <std::string>            lvalue
+
 %type  <std::shared_ptr<node>>  if_stmt
 %type  <std::shared_ptr<node>>  opt_elsifs
 %type  <std::shared_ptr<node>>  elsif
@@ -106,6 +111,12 @@ parser::token_type yylex(
 %type  <std::shared_ptr<node>>  next_stmt
 %type  <std::shared_ptr<node>>  break_stmt
 
+%type  <std::shared_ptr<node>>  do_stmt
+
+%type  <std::shared_ptr<node>>  opt_args
+%type  <std::shared_ptr<node>>  args
+%type  <std::shared_ptr<node>>  opt_params
+%type  <std::shared_ptr<node>>  params
 
 %right '='
 %left  LOGICAL_OR
@@ -141,7 +152,7 @@ stmt: expr       { $$ = $1; }
 	| if_stmt    { $$ = $1; }
 	| while_stmt { $$ = $1; }
 	| next_stmt  { $$ = $1; }
-	| break_stmt  { $$ = $1; }
+	| break_stmt { $$ = $1; }
 	;
 
 expr : expr '+' expr         { $$ = std::make_shared<node>(OP_ADD        , $1, $3); }
@@ -157,14 +168,24 @@ expr : expr '+' expr         { $$ = std::make_shared<node>(OP_ADD        , $1, $
 	 | expr LESS_EQ expr     { $$ = std::make_shared<node>(OP_LESS_EQ    , $1, $3); }
 	 | expr GREATER    expr  { $$ = std::make_shared<node>(OP_GREATER    , $1, $3); }
 	 | expr GREATER_EQ expr  { $$ = std::make_shared<node>(OP_GREATER_EQ , $1, $3); }
-	 | "identifier" '=' expr { $$ = std::make_shared<node>(OP_ASSIGN     , $1, $3); }
+	 | lvalue '=' expr       { $$ = std::make_shared<node>(OP_ASSIGN     , $1, $3); }
 	 | '-' expr %prec NEG    { $$ = std::make_shared<node>(OP_NEG        , $2); }
+	 | expr '(' opt_args ')' { $$ = std::make_shared<node>(OP_EXECFUNC   , $1, $3); }
 	 | '(' expr ')'          { $$ = $2; }
-	 | "identifier"          { $$ = std::make_shared<node>(OP_VALUE, $1); }
+	 | lvalue                { $$ = std::make_shared<node>(OP_VALUE, $1); }
 	 | "integer"             { $$ = std::make_shared<node>(OP_CONST, std::make_shared<integer>($1)); }
 	 | "real"                { $$ = std::make_shared<node>(OP_CONST, std::make_shared<real>($1)); }
 	 | "string"              { $$ = std::make_shared<node>(OP_CONST, std::make_shared<string>($1)); }
+	 | '\\' '(' opt_params ')' do_stmt
+	     { $$ = std::make_shared<node>(OP_CONST, std::make_shared<func>($3, $5)); }
 	 ;
+
+lvalue: "identifier" { $$ = $1; }
+	  ;
+
+do_stmt: DO term compstmt term END { $$ = $3; }
+	   | stmt { $$ = $1; }
+	   ;
 
 if_stmt: IF expr term compstmt term opt_elsifs opt_else END {
 		     $$ = std::make_shared<node>(OP_IF, $4, $6, $2);
@@ -217,6 +238,22 @@ next_stmt: NEXT { $$ = std::make_shared<node>(OP_NEXT); }
 
 break_stmt: BREAK { $$ = std::make_shared<node>(OP_BREAK); }
 		  ;
+
+opt_params:        { $$ = nullptr; }
+		  | params { $$ = $1; }
+		  ;
+
+params: lvalue             { $$ = std::make_shared<node>(OP_PARAM, $1); }
+	  | lvalue ','  params { $$ = std::make_shared<node>(OP_PARAM, $1, $3); }
+	  ;
+
+opt_args:      { $$ = nullptr; }
+		| args { $$ = $1; }
+		;
+
+args: expr          { $$ = std::make_shared<node>(OP_ARG, $1); }
+	| args ',' expr { $$ = std::make_shared<node>(OP_ARG, $1, $3); }
+	;
 
 %%
 
@@ -490,6 +527,11 @@ parser::token_type yylex(
 	if (chk.DiscardIfInputIs("end"))
 	{
 	return parser::token::END;
+	}
+
+	if (chk.DiscardIfInputIs("do"))
+	{
+		return parser::token::DO;
 	}
 
 	if (chk.DiscardIfInputIs("if"))

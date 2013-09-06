@@ -30,7 +30,10 @@ enum {
 	OP_IF,
 	OP_WHILE,
 	OP_NEXT,
-	OP_BREAK
+	OP_BREAK,
+	OP_PARAM,
+	OP_ARG,
+	OP_EXECFUNC
 };
 
 class node 

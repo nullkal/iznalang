@@ -7,6 +7,7 @@
 #include "parser.hh"
 #include "value.hh"
 #include "boolean.hh"
+#include "func.hh"
 #include "exception.hh"
 
 namespace izna {
@@ -78,8 +79,7 @@ std::shared_ptr<value> eval_tree(std::shared_ptr<node> node)
 	case OP_CONTINUE:
 		eval_tree(node->m_left);
 		return eval_tree(node->m_right);
-	
-	case OP_IF:
+
 		{
 			auto result = eval_tree(node->m_cond);
 
@@ -132,6 +132,27 @@ std::shared_ptr<value> eval_tree(std::shared_ptr<node> node)
 				}
 			}
 			return val;
+		}
+	case OP_EXECFUNC:
+		{
+			auto raw_f = eval_tree(node->m_left);
+			if (typeid(*raw_f) != typeid(func))
+			{
+				throw type_error();
+			}
+
+			auto f = static_cast<func&>(*raw_f);
+
+			auto cur_param = f.m_params;
+			auto cur_arg   = node->m_right;
+			while (cur_param != nullptr)
+			{
+				var_table[cur_param->m_string] = eval_tree(cur_arg->m_left);
+				cur_param = cur_param->m_right;
+				cur_arg   = cur_arg->m_right;
+			}
+
+			return eval_tree(f.m_stmt);
 		}
 	}
 	return 0;

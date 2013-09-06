@@ -15,6 +15,8 @@ SET(SRCS
 	integer.cc
 	real.hh
 	real.cc
+	func.hh
+	func.cc
 	string.hh
 	string.cc
 	exception.hh
