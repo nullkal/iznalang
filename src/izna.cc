@@ -80,6 +80,7 @@ std::shared_ptr<value> eval_tree(std::shared_ptr<node> node)
 		eval_tree(node->m_left);
 		return eval_tree(node->m_right);
 
+	case OP_IF:
 		{
 			auto result = eval_tree(node->m_cond);
 

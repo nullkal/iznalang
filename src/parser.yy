@@ -125,6 +125,7 @@ parser::token_type yylex(
 %left  '+' '-'
 %left  '*' '/' '%'
 %left  NEG
+%left  EXEC_FUNC
 
 %%
 
@@ -170,7 +171,7 @@ expr : expr '+' expr         { $$ = std::make_shared<node>(OP_ADD        , $1, $
 	 | expr GREATER_EQ expr  { $$ = std::make_shared<node>(OP_GREATER_EQ , $1, $3); }
 	 | lvalue '=' expr       { $$ = std::make_shared<node>(OP_ASSIGN     , $1, $3); }
 	 | '-' expr %prec NEG    { $$ = std::make_shared<node>(OP_NEG        , $2); }
-	 | expr '(' opt_args ')' { $$ = std::make_shared<node>(OP_EXECFUNC   , $1, $3); }
+	 | expr '(' opt_args ')' %prec EXEC_FUNC { $$ = std::make_shared<node>(OP_EXECFUNC, $1, $3); }
 	 | '(' expr ')'          { $$ = $2; }
 	 | lvalue                { $$ = std::make_shared<node>(OP_VALUE, $1); }
 	 | "integer"             { $$ = std::make_shared<node>(OP_CONST, std::make_shared<integer>($1)); }
