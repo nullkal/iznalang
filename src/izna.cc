@@ -17,7 +17,7 @@ std::unordered_map<std::string, std::shared_ptr<value>> var_table;
 class break_stmt: public std::exception {};
 class next_stmt : public std::exception {};
 
-std::shared_ptr<value> eval_tree(std::shared_ptr<node> node)
+value eval_tree(std::shared_ptr<node> node)
 {
 	if (!node) {
 		return 0;
@@ -26,55 +26,55 @@ std::shared_ptr<value> eval_tree(std::shared_ptr<node> node)
 	switch (node->m_op)
 	{
 	case OP_ADD:
-		return eval_tree(node->m_left)->Add(eval_tree(node->m_right));
+		return eval_tree(node->m_left).Add(eval_tree(node->m_right));
 
 	case OP_SUBTRACT:
-		return eval_tree(node->m_left)->Subtract(eval_tree(node->m_right));
+		return eval_tree(node->m_left).Subtract(eval_tree(node->m_right));
 
 	case OP_MULTIPLY:
-		return eval_tree(node->m_left)->Multiply(eval_tree(node->m_right));
+		return eval_tree(node->m_left).Multiply(eval_tree(node->m_right));
 
 	case OP_DIVIDE:
-		return eval_tree(node->m_left)->Divide(eval_tree(node->m_right));
+		return eval_tree(node->m_left).Divide(eval_tree(node->m_right));
 
 	case OP_MODULO:
-		return eval_tree(node->m_left)->Modulo(eval_tree(node->m_right));
+		return eval_tree(node->m_left).Modulo(eval_tree(node->m_right));
 
 	case OP_LOGICAL_OR:
-		return eval_tree(node->m_left)->LogicalOr(eval_tree(node->m_right));
+		return eval_tree(node->m_left).LogicalOr(eval_tree(node->m_right));
 
 	case OP_LOGICAL_AND:
-		return eval_tree(node->m_left)->LogicalAnd(eval_tree(node->m_right));
+		return eval_tree(node->m_left).LogicalAnd(eval_tree(node->m_right));
 
 	case OP_EQ:
-		return eval_tree(node->m_left)->Eq(eval_tree(node->m_right));
+		return eval_tree(node->m_left).Eq(eval_tree(node->m_right));
 
 	case OP_NE:
-		return eval_tree(node->m_left)->Ne(eval_tree(node->m_right));
+		return eval_tree(node->m_left).Ne(eval_tree(node->m_right));
 
 	case OP_LESS:
-		return eval_tree(node->m_left)->Less(eval_tree(node->m_right));
+		return eval_tree(node->m_left).Less(eval_tree(node->m_right));
 
 	case OP_LESS_EQ:
-		return eval_tree(node->m_left)->LessEq(eval_tree(node->m_right));
+		return eval_tree(node->m_left).LessEq(eval_tree(node->m_right));
 
 	case OP_GREATER:
-		return eval_tree(node->m_left)->Greater(eval_tree(node->m_right));
+		return eval_tree(node->m_left).Greater(eval_tree(node->m_right));
 
 	case OP_GREATER_EQ:
-		return eval_tree(node->m_left)->GreaterEq(eval_tree(node->m_right));
+		return eval_tree(node->m_left).GreaterEq(eval_tree(node->m_right));
 
 	case OP_ASSIGN:
 		return var_table[node->m_string] = eval_tree(node->m_right);
 
 	case OP_NEG:
-		return eval_tree(node->m_left)->Neg();
+		return eval_tree(node->m_left).Neg();
 
 	case OP_VALUE:
 		return var_table[node->m_string];
 
 	case OP_CONST:
-		return node->m_value;
+		return *(node->m_value);
 
 	case OP_CONTINUE:
 		eval_tree(node->m_left);
@@ -84,7 +84,7 @@ std::shared_ptr<value> eval_tree(std::shared_ptr<node> node)
 		{
 			auto result = eval_tree(node->m_cond);
 
-			auto casted_result = std::dynamic_pointer_cast<boolean>(result);
+			auto casted_result = dynamic_cast<boolean&>(result);
 			if (!casted_result)
 			{
 				throw type_error();
@@ -112,7 +112,7 @@ std::shared_ptr<value> eval_tree(std::shared_ptr<node> node)
 			{
 				auto result = eval_tree(node->m_cond);
 
-				auto casted_result = std::dynamic_pointer_cast<boolean>(result);
+				auto casted_result = std::dynamic_cast<boolean&>(result);
 				if (!casted_result)
 				{
 					throw type_error();
@@ -137,12 +137,12 @@ std::shared_ptr<value> eval_tree(std::shared_ptr<node> node)
 	case OP_EXECFUNC:
 		{
 			auto raw_f = eval_tree(node->m_left);
-			if (typeid(*raw_f) != typeid(func))
+			if (typeid(raw_f) != typeid(func))
 			{
 				throw type_error();
 			}
 
-			auto f = static_cast<func&>(*raw_f);
+			auto f = static_cast<func&>(raw_f);
 
 			auto cur_param = f.m_params;
 			auto cur_arg   = node->m_right;

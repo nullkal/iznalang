@@ -14,72 +14,72 @@ std::string func::ToString() const
 	return "<Func>";
 }
 
-std::shared_ptr<value> func::Add(std::shared_ptr<value> rhs) const
+value func::Add(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> func::Subtract(std::shared_ptr<value> rhs) const
+value func::Subtract(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> func::Multiply(std::shared_ptr<value> rhs) const
+value func::Multiply(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> func::Divide(std::shared_ptr<value> rhs) const
+value func::Divide(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> func::Modulo(std::shared_ptr<value> rhs) const
+value func::Modulo(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> func::LogicalOr(std::shared_ptr<value> rhs) const
+value func::LogicalOr(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> func::LogicalAnd(std::shared_ptr<value> rhs) const
+value func::LogicalAnd(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> func::Eq(std::shared_ptr<value> rhs) const
+value func::Eq(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> func::Ne(std::shared_ptr<value> rhs) const
+value func::Ne(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> func::Less(std::shared_ptr<value> rhs) const
+value func::Less(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> func::LessEq(std::shared_ptr<value> rhs) const
+value func::LessEq(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> func::Greater(std::shared_ptr<value> rhs) const
+value func::Greater(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> func::GreaterEq(std::shared_ptr<value> rhs) const
+value func::GreaterEq(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> func::Neg() const
+value func::Neg() const
 {
 	throw type_error();
 }

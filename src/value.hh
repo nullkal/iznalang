@@ -1,7 +1,6 @@
 #ifndef IZNA_VALUE_HH
 #define IZNA_VALUE_HH
 
-#include <memory>
 #include <string>
 
 namespace izna {
@@ -12,25 +11,26 @@ public:
 	virtual ~value()
 	{}
 
+	virtual std::unique_ptr<value> Clone() const = 0;
 	virtual std::string ToString() const = 0;
 
-	virtual std::shared_ptr<value> Add(std::shared_ptr<value> rhs) const = 0;
-	virtual std::shared_ptr<value> Subtract(std::shared_ptr<value>rhs) const = 0;
-	virtual std::shared_ptr<value> Multiply(std::shared_ptr<value>rhs) const = 0;
-	virtual std::shared_ptr<value> Divide(std::shared_ptr<value>rhs) const = 0;
-	virtual std::shared_ptr<value> Modulo(std::shared_ptr<value>rhs) const = 0;
+	virtual void Add(const value& rhs) = 0;
+	virtual void Subtract(const value& rhs) = 0;
+	virtual void Multiply(const value& rhs) = 0;
+	virtual void Divide(const value& rhs) = 0;
+	virtual void Modulo(const value& rhs) = 0;
 
-	virtual std::shared_ptr<value> LogicalOr(std::shared_ptr<value>rhs) const = 0;
-	virtual std::shared_ptr<value> LogicalAnd(std::shared_ptr<value>rhs) const = 0;
+	virtual void LogicalOr(const value& rhs) = 0;
+	virtual void LogicalAnd(const value& rhs) = 0;
 
-	virtual std::shared_ptr<value> Eq(std::shared_ptr<value>rhs) const = 0;
-	virtual std::shared_ptr<value> Ne(std::shared_ptr<value>rhs) const = 0;
-	virtual std::shared_ptr<value> Less(std::shared_ptr<value>rhs) const = 0;
-	virtual std::shared_ptr<value> LessEq(std::shared_ptr<value>rhs) const = 0;
-	virtual std::shared_ptr<value> Greater(std::shared_ptr<value>rhs) const = 0;
-	virtual std::shared_ptr<value> GreaterEq(std::shared_ptr<value>rhs) const = 0;
+	virtual void Eq(const value& rhs) = 0;
+	virtual void Ne(const value& rhs) = 0;
+	virtual void Less(const value& rhs) = 0;
+	virtual void LessEq(const value& rhs) = 0;
+	virtual void Greater(const value& rhs) = 0;
+	virtual void GreaterEq(const value& rhs) = 0;
 
-	virtual std::shared_ptr<value> Neg() const = 0;
+	virtual void Neg() = 0;
 };
 
 } //izna

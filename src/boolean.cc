@@ -19,49 +19,49 @@ std::string boolean::ToString() const
 	}
 }
 
-std::shared_ptr<value> boolean::Add(std::shared_ptr<value> rhs) const
+value boolean::Add(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> boolean::Subtract(std::shared_ptr<value> rhs) const
+value boolean::Subtract(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> boolean::Multiply(std::shared_ptr<value> rhs) const
+value boolean::Multiply(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> boolean::Divide(std::shared_ptr<value> rhs) const
+value boolean::Divide(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> boolean::Modulo(std::shared_ptr<value> rhs) const
+value boolean::Modulo(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> boolean::LogicalOr(std::shared_ptr<value> rhs) const
+value boolean::LogicalOr(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<integer>(m_value || rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return integer(m_value || rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> boolean::LogicalAnd(std::shared_ptr<value> rhs) const
+value boolean::LogicalAnd(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<integer>(m_value && rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return integer(m_value && rhs_value);
 	} else
 	{
 		throw type_error();
@@ -69,79 +69,79 @@ std::shared_ptr<value> boolean::LogicalAnd(std::shared_ptr<value> rhs) const
 }
 
 
-std::shared_ptr<value> boolean::Eq(std::shared_ptr<value> rhs) const
+value boolean::Eq(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<boolean>(m_value == rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return boolean(m_value == rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> boolean::Ne(std::shared_ptr<value> rhs) const
+value boolean::Ne(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<boolean>(m_value != rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return boolean(m_value != rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> boolean::Less(std::shared_ptr<value> rhs) const
+value boolean::Less(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<boolean>(m_value < rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return boolean(m_value < rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> boolean::LessEq(std::shared_ptr<value> rhs) const
+value boolean::LessEq(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<boolean>(m_value <= rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return boolean(m_value <= rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> boolean::Greater(std::shared_ptr<value> rhs) const
+value boolean::Greater(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<boolean>(m_value > rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return boolean(m_value > rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> boolean::GreaterEq(std::shared_ptr<value> rhs) const
+value boolean::GreaterEq(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<boolean>(m_value >= rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return boolean(m_value >= rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> boolean::Neg() const
+value boolean::Neg() const
 {
 	throw type_error();
 }

@@ -16,144 +16,144 @@ std::string real::ToString() const
 	return boost::lexical_cast<std::string>(m_value);
 }
 
-std::shared_ptr<value> real::Add(std::shared_ptr<value> rhs) const
+value real::Add(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<real>(m_value + rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return real(m_value + rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> real::Subtract(std::shared_ptr<value> rhs) const
+value real::Subtract(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<real>(m_value - rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return real(m_value - rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> real::Multiply(std::shared_ptr<value> rhs) const
+value real::Multiply(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<real>(m_value * rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return real(m_value * rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> real::Divide(std::shared_ptr<value> rhs) const
+value real::Divide(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<real>(m_value / rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return real(m_value / rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> real::Modulo(std::shared_ptr<value> rhs) const
+value real::Modulo(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> real::LogicalOr(std::shared_ptr<value> rhs) const
+value real::LogicalOr(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> real::LogicalAnd(std::shared_ptr<value> rhs) const
+value real::LogicalAnd(const value& rhs) const
 {
 	throw type_error();
 }
 
-std::shared_ptr<value> real::Eq(std::shared_ptr<value> rhs) const
+value real::Eq(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<boolean>(m_value == rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return boolean(m_value == rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> real::Ne(std::shared_ptr<value> rhs) const
+value real::Ne(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<boolean>(m_value != rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return boolean(m_value != rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> real::Less(std::shared_ptr<value> rhs) const
+value real::Less(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<boolean>(m_value < rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return boolean(m_value < rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> real::LessEq(std::shared_ptr<value> rhs) const
+value real::LessEq(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<boolean>(m_value <= rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return boolean(m_value <= rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> real::Greater(std::shared_ptr<value> rhs) const
+value real::Greater(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<boolean>(m_value > rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return boolean(m_value > rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> real::GreaterEq(std::shared_ptr<value> rhs) const
+value real::GreaterEq(const value& rhs) const
 {
-	if (typeid(*rhs) == typeid(*this))
+	if (typeid(rhs) == typeid(*this))
 	{
-		auto rhs_value = static_cast<decltype(*this)>(*rhs).m_value;
-		return std::make_shared<boolean>(m_value >= rhs_value);
+		auto rhs_value = static_cast<decltype(*this)>(rhs).m_value;
+		return boolean(m_value >= rhs_value);
 	} else
 	{
 		throw type_error();
 	}
 }
 
-std::shared_ptr<value> real::Neg() const
+value real::Neg() const
 {
-	return std::make_shared<real>(-m_value);
+	return real(-m_value);
 }
 
 } //izna

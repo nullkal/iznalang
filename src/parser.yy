@@ -174,11 +174,11 @@ expr : expr '+' expr         { $$ = std::make_shared<node>(OP_ADD        , $1, $
 	 | expr '(' opt_args ')' %prec EXEC_FUNC { $$ = std::make_shared<node>(OP_EXECFUNC, $1, $3); }
 	 | '(' expr ')'          { $$ = $2; }
 	 | lvalue                { $$ = std::make_shared<node>(OP_VALUE, $1); }
-	 | "integer"             { $$ = std::make_shared<node>(OP_CONST, std::make_shared<integer>($1)); }
-	 | "real"                { $$ = std::make_shared<node>(OP_CONST, std::make_shared<real>($1)); }
-	 | "string"              { $$ = std::make_shared<node>(OP_CONST, std::make_shared<string>($1)); }
+	 | "integer"             { $$ = std::make_shared<node>(OP_CONST, integer($1)); }
+	 | "real"                { $$ = std::make_shared<node>(OP_CONST, real($1)); }
+	 | "string"              { $$ = std::make_shared<node>(OP_CONST, string($1)); }
 	 | '\\' '(' opt_params ')' do_stmt
-	     { $$ = std::make_shared<node>(OP_CONST, std::make_shared<func>($3, $5)); }
+	     { $$ = std::make_shared<node>(OP_CONST, func($3, $5)); }
 	 ;
 
 lvalue: "identifier" { $$ = $1; }
