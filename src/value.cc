@@ -148,7 +148,7 @@ int value::toInteger() const
 
 	if (isReal())
 	{
-		return static_cast<int>(reinterpret_cast<integer *>(m_val)->v);
+		return static_cast<int>(reinterpret_cast<real *>(m_val)->v);
 	}
 
 	throw type_error();
@@ -163,7 +163,7 @@ double value::toReal() const
 
 	if (isReal())
 	{
-		return reinterpret_cast<integer *>(m_val)->v;
+		return reinterpret_cast<real *>(m_val)->v;
 	}
 
 	throw type_error();
