@@ -51,10 +51,7 @@ struct parser_params
 #include <boost/lexical_cast.hpp>
 
 #include "parser.hh"
-#include "integer.hh"
-#include "real.hh"
-#include "string.hh"
-#include "func.hh"
+#include "value.hh"
 
 namespace izna {
 
@@ -174,11 +171,11 @@ expr : expr '+' expr         { $$ = std::make_shared<node>(OP_ADD        , $1, $
 	 | expr '(' opt_args ')' %prec EXEC_FUNC { $$ = std::make_shared<node>(OP_EXECFUNC, $1, $3); }
 	 | '(' expr ')'          { $$ = $2; }
 	 | lvalue                { $$ = std::make_shared<node>(OP_VALUE, $1); }
-	 | "integer"             { $$ = std::make_shared<node>(OP_CONST, integer($1)); }
-	 | "real"                { $$ = std::make_shared<node>(OP_CONST, real($1)); }
-	 | "string"              { $$ = std::make_shared<node>(OP_CONST, string($1)); }
+	 | "integer"             { $$ = std::make_shared<node>(OP_CONST, value($1)); }
+	 | "real"                { $$ = std::make_shared<node>(OP_CONST, value($1)); }
+	 | "string"              { $$ = std::make_shared<node>(OP_CONST, value($1)); }
 	 | '\\' '(' opt_params ')' do_stmt
-	     { $$ = std::make_shared<node>(OP_CONST, func($3, $5)); }
+	     { $$ = std::make_shared<node>(OP_CONST, value($3, $5)); }
 	 ;
 
 lvalue: "identifier" { $$ = $1; }

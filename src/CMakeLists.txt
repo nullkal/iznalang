@@ -9,16 +9,7 @@ SET(SRCS
 	node.hh
 	izna.cc
 	value.hh
-	boolean.hh
-	boolean.cc
-	integer.hh
-	integer.cc
-	real.hh
-	real.cc
-	func.hh
-	func.cc
-	string.hh
-	string.cc
+	value.cc
 	exception.hh
 	${BISON_IznaParser_OUTPUTS})
 

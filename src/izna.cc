@@ -6,13 +6,11 @@
 
 #include "parser.hh"
 #include "value.hh"
-#include "boolean.hh"
-#include "func.hh"
 #include "exception.hh"
 
 namespace izna {
 
-std::unordered_map<std::string, std::shared_ptr<value>> var_table;
+std::unordered_map<std::string, value> var_table;
 
 class break_stmt: public std::exception {};
 class next_stmt : public std::exception {};
@@ -20,7 +18,7 @@ class next_stmt : public std::exception {};
 value eval_tree(std::shared_ptr<node> node)
 {
 	if (!node) {
-		return 0;
+		return value();
 	}
 
 	switch (node->m_op)
@@ -29,22 +27,22 @@ value eval_tree(std::shared_ptr<node> node)
 		return eval_tree(node->m_left).Add(eval_tree(node->m_right));
 
 	case OP_SUBTRACT:
-		return eval_tree(node->m_left).Subtract(eval_tree(node->m_right));
+		return eval_tree(node->m_left).Sub(eval_tree(node->m_right));
 
 	case OP_MULTIPLY:
-		return eval_tree(node->m_left).Multiply(eval_tree(node->m_right));
+		return eval_tree(node->m_left).Mul(eval_tree(node->m_right));
 
 	case OP_DIVIDE:
-		return eval_tree(node->m_left).Divide(eval_tree(node->m_right));
+		return eval_tree(node->m_left).Div(eval_tree(node->m_right));
 
 	case OP_MODULO:
-		return eval_tree(node->m_left).Modulo(eval_tree(node->m_right));
+		return eval_tree(node->m_left).Mod(eval_tree(node->m_right));
 
 	case OP_LOGICAL_OR:
-		return eval_tree(node->m_left).LogicalOr(eval_tree(node->m_right));
+		return eval_tree(node->m_left).LOr(eval_tree(node->m_right));
 
 	case OP_LOGICAL_AND:
-		return eval_tree(node->m_left).LogicalAnd(eval_tree(node->m_right));
+		return eval_tree(node->m_left).LAnd(eval_tree(node->m_right));
 
 	case OP_EQ:
 		return eval_tree(node->m_left).Eq(eval_tree(node->m_right));
@@ -82,15 +80,7 @@ value eval_tree(std::shared_ptr<node> node)
 
 	case OP_IF:
 		{
-			auto result = eval_tree(node->m_cond);
-
-			auto casted_result = dynamic_cast<boolean&>(result);
-			if (!casted_result)
-			{
-				throw type_error();
-			}
-
-			if (casted_result->m_value)
+			if (eval_tree(node->m_cond).toBoolean())
 			{
 				return eval_tree(node->m_left);
 			} else
@@ -107,18 +97,10 @@ value eval_tree(std::shared_ptr<node> node)
 
 	case OP_WHILE:
 		{
-			std::shared_ptr<value> val = 0;
+			value val = value();
 			for(;;)
 			{
-				auto result = eval_tree(node->m_cond);
-
-				auto casted_result = std::dynamic_cast<boolean&>(result);
-				if (!casted_result)
-				{
-					throw type_error();
-				}
-
-				if (!casted_result->m_value)
+				if (!eval_tree(node->m_cond).toBoolean())
 				{
 					break;
 				}
@@ -136,15 +118,9 @@ value eval_tree(std::shared_ptr<node> node)
 		}
 	case OP_EXECFUNC:
 		{
-			auto raw_f = eval_tree(node->m_left);
-			if (typeid(raw_f) != typeid(func))
-			{
-				throw type_error();
-			}
+			auto f = eval_tree(node->m_left).toFunc();
 
-			auto f = static_cast<func&>(raw_f);
-
-			auto cur_param = f.m_params;
+			auto cur_param = f.params;
 			auto cur_arg   = node->m_right;
 			while (cur_param != nullptr)
 			{
@@ -153,10 +129,10 @@ value eval_tree(std::shared_ptr<node> node)
 				cur_arg   = cur_arg->m_right;
 			}
 
-			return eval_tree(f.m_stmt);
+			return eval_tree(f.stmt);
 		}
 	}
-	return 0;
+	return value();
 }
 
 } //izna
@@ -176,7 +152,7 @@ int main(int argc, char *argv[])
 	izna::eval_tree(params.root);
 	for (auto &it: izna::var_table)
 	{
-		std::cout << it.first << ": " << it.second->ToString() << std::endl;
+		std::cout << it.first << ": " << it.second.toString() << std::endl;
 	}
 
 	return 0;
