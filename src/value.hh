@@ -7,12 +7,20 @@
 
 namespace izna {
 
-const intptr_t FALSE = 0;
-const intptr_t TRUE  = 2;
-const intptr_t NIL   = 4;
-
 class node;
 struct func;
+
+enum class value_type
+{
+	NIL,
+	FALSE,
+	TRUE,
+
+	INTEGER,
+	REAL,
+	STRING,
+	FUNC
+};
 
 class value
 {
@@ -26,6 +34,8 @@ public:
 
 	value(const value &v);
 	value& operator=(const value &rhs);
+
+	void swap(value &b);
 
 	virtual ~value();
 
@@ -66,45 +76,19 @@ public:
 	value Neg() const;
 
 private:
+	value_type m_type;
 	std::intptr_t m_val;
-};
-
-enum class value_type
-{
-	INTEGER,
-	REAL,
-	STRING,
-	FUNC
-};
-
-struct value_header
-{
-	value_type type;
-};
-
-struct integer
-{
-	value_header h;
-	int v;
-};
-
-struct real
-{
-	value_header h;
-	double v;
-};
-
-struct string
-{
-	value_header h;
-	std::string v;
 };
 
 struct func
 {
-	value_header h;
 	std::shared_ptr<node> params;
 	std::shared_ptr<node> stmt;
+
+	explicit func(std::shared_ptr<node> params, std::shared_ptr<node> stmt):
+		params(params),
+		stmt(stmt)
+	{}
 };
 
 } //izna

@@ -1,241 +1,148 @@
 #include "value.hh"
 #include "exception.hh"
 
+#include <algorithm>
 #include <string>
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 
 namespace izna {
-namespace {
-
-intptr_t MakeInteger(int v)
-{
-	auto new_obj = new integer;
-	new_obj->h.type = value_type::INTEGER;
-	new_obj->v = v;
-
-	return reinterpret_cast<intptr_t>(new_obj);
-}
-
-intptr_t MakeReal(double v)
-{
-	auto new_obj = new real;
-	new_obj->h.type = value_type::REAL;
-	new_obj->v = v;
-
-	return reinterpret_cast<intptr_t>(new_obj);
-}
-
-intptr_t MakeString(std::string v)
-{
-	auto new_obj = new string;
-	new_obj->h.type = value_type::STRING;
-	new_obj->v = v;
-
-	return reinterpret_cast<intptr_t>(new_obj);
-}
-
-intptr_t MakeFunc(std::shared_ptr<node> params, std::shared_ptr<node> stmt)
-{
-	auto new_obj = new func;
-	new_obj->h.type = value_type::FUNC;
-	new_obj->params = params;
-	new_obj->stmt   = stmt;
-
-	return reinterpret_cast<intptr_t>(new_obj);
-}
-
-bool isConst(const value &v)
-{
-	return v.isFalse() || v.isTrue() || v.isNil();
-}
-
-} //izna::(anonymous)
 
 value::value():
-	m_val(NIL)
+	m_type(value_type::NIL),
+	m_val(0)
 {}
 
 value::value(int v):
-	m_val(MakeInteger(v))
+	m_type(value_type::INTEGER),
+	m_val(v)
 {}
 
 value::value(double v):
-	m_val(MakeReal(v))
+	m_type(value_type::REAL),
+	m_val(reinterpret_cast<intptr_t>(new double(v)))
 {}
 
 value::value(bool v):
-	m_val(v ? TRUE : FALSE)
+	m_type(v ? value_type::TRUE : value_type::FALSE),
+	m_val(0)
 {}
 
 value::value(const std::string &v):
-	m_val(MakeString(v))
+	m_type(value_type::STRING),
+	m_val(reinterpret_cast<intptr_t>(new std::string(v)))
 {}
 
 value::value(std::shared_ptr<node> params, std::shared_ptr<node> stmt):
-	m_val(MakeFunc(params, stmt))
+	m_type(value_type::FUNC),
+	m_val(reinterpret_cast<intptr_t>(new func(params, stmt)))
 {}
 
 value::value(const value &v):
-	m_val(NIL)
+	m_type(v.m_type),
+	m_val(v.m_val)
 {
-	*this = v;
+	if (v.isReal())
+	{
+		auto val = reinterpret_cast<double *>(v.m_val);
+		m_val = reinterpret_cast<intptr_t>(new double(*val));
+	}
+
+	if (v.isString())
+	{
+		auto val = reinterpret_cast<std::string *>(v.m_val);
+		m_val = reinterpret_cast<intptr_t>(new std::string(*val));
+	}
+
+	if (v.isFunc())
+	{
+		auto val = reinterpret_cast<func *>(v.m_val);
+		m_val = reinterpret_cast<intptr_t>(new func(*val));
+	}
 }
 
 value& value::operator=(const value &rhs)
 {
-	if (isConst(rhs))
-	{
-		m_val = rhs.m_val;
-		return (*this);
-	}
+	value tmp(rhs);
+	this->swap(tmp);
 
-	DeleteValue();
+	return *this;
+}
 
-	if (rhs.isInteger())
-	{
-		auto val = new integer;
-		val->h.type = value_type::INTEGER;
-		val->v = reinterpret_cast<integer *>(rhs.m_val)->v;
-		m_val = reinterpret_cast<intptr_t>(val);
-		return (*this);
-	}
-
-	if (rhs.isReal())
-	{
-		auto val = new real;
-		val->h.type = value_type::REAL;
-		val->v = reinterpret_cast<real *>(rhs.m_val)->v;
-		m_val = reinterpret_cast<intptr_t>(val);
-		return (*this);
-	}
-
-	if (rhs.isString())
-	{
-		auto val = new string;
-		val->h.type = value_type::STRING;
-		val->v = reinterpret_cast<string *>(rhs.m_val)->v;
-		m_val = reinterpret_cast<intptr_t>(val);
-		return (*this);
-	}
-
-	if (rhs.isFunc())
-	{
-		auto val = new func;
-		val->h.type = value_type::FUNC;
-		val->params = reinterpret_cast<func *>(rhs.m_val)->params;
-		val->stmt   = reinterpret_cast<func *>(rhs.m_val)->stmt;
-		m_val = reinterpret_cast<intptr_t>(val);
-		return (*this);
-	}
+void value::swap(value &b)
+{
+	std::swap(this->m_type, b.m_type);
+	std::swap(this->m_val,  b.m_val);
 }
 
 value::~value()
 {
-	DeleteValue();
-}
-
-void value::DeleteValue()
-{
-	if (isInteger())
-	{
-		delete reinterpret_cast<integer *>(m_val);
-		m_val = NIL;
-		return;
-	}
-
 	if (isReal())
 	{
-		delete reinterpret_cast<real *>(m_val);
-		m_val = NIL;
-		return;
+		delete reinterpret_cast<double *>(m_val);
 	}
 
 	if (isString())
 	{
-		delete reinterpret_cast<string *>(m_val);
-		m_val = NIL;
-		return;
+		delete reinterpret_cast<std::string *>(m_val);
 	}
 
 	if (isFunc())
 	{
 		delete reinterpret_cast<func *>(m_val);
-		m_val = NIL;
-		return;
 	}
 }
 
 bool value::isNil() const
 {
-	return m_val == NIL;
+	return m_type == value_type::NIL;
 }
 
 bool value::isInteger() const
 {
-	if (isConst(*this))
-	{
-		return false;
-	}
-
-	return reinterpret_cast<value_header *>(m_val)->type == value_type::INTEGER;
+	return m_type == value_type::INTEGER;
 }
 
 bool value::isReal() const
 {
-	if (isConst(*this))
-	{
-		return false;
-	}
-
-	return reinterpret_cast<value_header *>(m_val)->type == value_type::REAL;
+	return m_type == value_type::REAL;
 }
 
 bool value::isBoolean() const
 {
-	return m_val == FALSE || m_val == TRUE;
+	return isTrue() || isFalse();
 }
 
 bool value::isString() const
 {
-	if (isConst(*this))
-	{
-		return false;
-	}
-
-	return reinterpret_cast<value_header *>(m_val)->type == value_type::STRING;
+	return m_type == value_type::STRING;
 }
 
 bool value::isFunc() const
 {
-	if (isConst(*this))
-	{
-		return false;
-	}
-
-	return reinterpret_cast<value_header *>(m_val)->type == value_type::FUNC;
+	return m_type == value_type::FUNC;
 }
 
 bool value::isTrue() const
 {
-	return m_val == TRUE;
+	return m_type == value_type::TRUE;
 }
 
 bool value::isFalse() const
 {
-	return m_val == FALSE;
+	return m_type == value_type::FALSE;
 }
 
 int value::toInteger() const
 {
 	if (isInteger())
 	{
-		return reinterpret_cast<integer *>(m_val)->v;
+		return m_val;
 	}
 
 	if (isReal())
 	{
-		return static_cast<int>(reinterpret_cast<real *>(m_val)->v);
+		return static_cast<int>(*reinterpret_cast<double *>(m_val));
 	}
 
 	throw type_error();
@@ -245,12 +152,12 @@ double value::toReal() const
 {
 	if (isInteger())
 	{
-		return static_cast<double>(reinterpret_cast<integer *>(m_val)->v);
+		return static_cast<double>(m_val);
 	}
 
 	if (isReal())
 	{
-		return reinterpret_cast<real *>(m_val)->v;
+		return *reinterpret_cast<double *>(m_val);
 	}
 
 	throw type_error();
@@ -270,17 +177,17 @@ bool value::toBoolean() const
 
 	if (isInteger())
 	{
-		return reinterpret_cast<integer *>(m_val)->v != 0;
+		return m_val;
 	}
 
 	if (isReal())
 	{
-		return reinterpret_cast<real *>(m_val)->v != 0;
+		return reinterpret_cast<double *>(m_val);
 	}
 
 	if (isString())
 	{
-		return !reinterpret_cast<string *>(m_val)->v.empty();
+		return !reinterpret_cast<std::string *>(m_val)->empty();
 	}
 
 	throw type_error();
@@ -305,17 +212,17 @@ std::string value::toString() const
 
 	if (isInteger())
 	{
-		return boost::lexical_cast<std::string>(reinterpret_cast<integer *>(m_val)->v);
+		return boost::lexical_cast<std::string>(m_val);
 	}
 
 	if (isReal())
 	{
-		return boost::lexical_cast<std::string>(reinterpret_cast<real *>(m_val)->v);
+		return boost::lexical_cast<std::string>(*reinterpret_cast<double *>(m_val));
 	}
 
 	if (isString())
 	{
-		return reinterpret_cast<string *>(m_val)->v;
+		return *reinterpret_cast<std::string *>(m_val);
 	}
 
 	if (isFunc())
