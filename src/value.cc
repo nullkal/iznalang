@@ -24,8 +24,8 @@ value::value(double v):
 {}
 
 value::value(bool v):
-	m_type(v ? value_type::TRUE : value_type::FALSE),
-	m_val(0)
+	m_type(value_type::BOOLEAN),
+	m_val(v)
 {}
 
 value::value(const std::string &v):
@@ -110,7 +110,7 @@ bool value::isReal() const
 
 bool value::isBoolean() const
 {
-	return isTrue() || isFalse();
+	return m_type == value_type::BOOLEAN;
 }
 
 bool value::isString() const
@@ -125,12 +125,12 @@ bool value::isFunc() const
 
 bool value::isTrue() const
 {
-	return m_type == value_type::TRUE;
+	return m_type == value_type::BOOLEAN && m_val;
 }
 
 bool value::isFalse() const
 {
-	return m_type == value_type::FALSE;
+	return m_type == value_type::BOOLEAN && !m_val;
 }
 
 int value::toInteger() const
@@ -165,14 +165,14 @@ double value::toReal() const
 
 bool value::toBoolean() const
 {
-	if (isNil() || isFalse())
+	if (isNil())
 	{
 		return false;
 	}
 
-	if (isTrue())
+	if (isBoolean())
 	{
-		return true;
+		return m_val;
 	}
 
 	if (isInteger())

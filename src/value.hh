@@ -13,9 +13,8 @@ struct func;
 enum class value_type
 {
 	NIL,
-	FALSE,
-	TRUE,
 
+	BOOLEAN,
 	INTEGER,
 	REAL,
 	STRING,
