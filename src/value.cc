@@ -71,9 +71,11 @@ value& value::operator=(const value &rhs)
 }
 
 value::value(value &&v):
-	m_type(v.m_type),
-	m_val(v.m_val)
-{}
+	m_type(value_type::NIL),
+	m_val(0)
+{
+	swap(v);
+}
 
 value& value::operator=(value &&v)
 {
