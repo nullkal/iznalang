@@ -34,7 +34,10 @@ public:
 	value(const value &v);
 	value& operator=(const value &rhs);
 
-	void swap(value &b);
+	value(value &&v);
+	value& operator=(value &&v);
+
+	void swap(value &b) noexcept;
 
 	virtual ~value();
 

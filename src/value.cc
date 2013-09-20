@@ -39,37 +39,49 @@ value::value(std::shared_ptr<node> params, std::shared_ptr<node> stmt):
 {}
 
 value::value(const value &v):
-	m_type(v.m_type),
-	m_val(v.m_val)
+	m_type(value_type::NIL),
+	m_val(0)
 {
 	if (v.isReal())
 	{
 		auto val = reinterpret_cast<double *>(v.m_val);
 		m_val = reinterpret_cast<intptr_t>(new double(*val));
-	}
-
-	if (v.isString())
+	} else if (v.isString())
 	{
 		auto val = reinterpret_cast<std::string *>(v.m_val);
 		m_val = reinterpret_cast<intptr_t>(new std::string(*val));
-	}
-
-	if (v.isFunc())
+	} else if (v.isFunc())
 	{
 		auto val = reinterpret_cast<func *>(v.m_val);
 		m_val = reinterpret_cast<intptr_t>(new func(*val));
+	} else
+	{
+		m_val = v.m_val;
 	}
+
+	m_type = v.m_type;
 }
 
 value& value::operator=(const value &rhs)
 {
 	value tmp(rhs);
-	this->swap(tmp);
+	swap(tmp);
 
 	return *this;
 }
 
-void value::swap(value &b)
+value::value(value &&v):
+	m_type(v.m_type),
+	m_val(v.m_val)
+{}
+
+value& value::operator=(value &&v)
+{
+	swap(v);
+	return *this;
+}
+
+void value::swap(value &b) noexcept
 {
 	std::swap(this->m_type, b.m_type);
 	std::swap(this->m_val,  b.m_val);
