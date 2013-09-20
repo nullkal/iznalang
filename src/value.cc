@@ -76,8 +76,95 @@ value::value(std::shared_ptr<node> params, std::shared_ptr<node> stmt):
 	m_val(MakeFunc(params, stmt))
 {}
 
+value::value(const value &v):
+	m_val(NIL)
+{
+	*this = v;
+}
+
+value& value::operator=(const value &rhs)
+{
+	if (isConst(rhs))
+	{
+		m_val = rhs.m_val;
+		return (*this);
+	}
+
+	DeleteValue();
+
+	if (rhs.isInteger())
+	{
+		auto val = new integer;
+		val->h.type = value_type::INTEGER;
+		val->v = reinterpret_cast<integer *>(rhs.m_val)->v;
+		m_val = reinterpret_cast<intptr_t>(val);
+		return (*this);
+	}
+
+	if (rhs.isReal())
+	{
+		auto val = new real;
+		val->h.type = value_type::REAL;
+		val->v = reinterpret_cast<real *>(rhs.m_val)->v;
+		m_val = reinterpret_cast<intptr_t>(val);
+		return (*this);
+	}
+
+	if (rhs.isString())
+	{
+		auto val = new string;
+		val->h.type = value_type::STRING;
+		val->v = reinterpret_cast<string *>(rhs.m_val)->v;
+		m_val = reinterpret_cast<intptr_t>(val);
+		return (*this);
+	}
+
+	if (rhs.isFunc())
+	{
+		auto val = new func;
+		val->h.type = value_type::FUNC;
+		val->params = reinterpret_cast<func *>(rhs.m_val)->params;
+		val->stmt   = reinterpret_cast<func *>(rhs.m_val)->stmt;
+		m_val = reinterpret_cast<intptr_t>(val);
+		return (*this);
+	}
+}
+
 value::~value()
-{}
+{
+	DeleteValue();
+}
+
+void value::DeleteValue()
+{
+	if (isInteger())
+	{
+		delete reinterpret_cast<integer *>(m_val);
+		m_val = NIL;
+		return;
+	}
+
+	if (isReal())
+	{
+		delete reinterpret_cast<real *>(m_val);
+		m_val = NIL;
+		return;
+	}
+
+	if (isString())
+	{
+		delete reinterpret_cast<string *>(m_val);
+		m_val = NIL;
+		return;
+	}
+
+	if (isFunc())
+	{
+		delete reinterpret_cast<func *>(m_val);
+		m_val = NIL;
+		return;
+	}
+}
 
 bool value::isNil() const
 {

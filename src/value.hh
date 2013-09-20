@@ -24,7 +24,12 @@ public:
 	explicit value(const std::string &v);
 	explicit value(std::shared_ptr<node> params, std::shared_ptr<node> stmt);
 
+	value(const value &v);
+	value& operator=(const value &rhs);
+
 	virtual ~value();
+
+	void DeleteValue();
 
 	bool isNil() const;
 	bool isInteger() const;
