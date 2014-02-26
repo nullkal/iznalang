@@ -2,6 +2,7 @@
 #define IZNA_VALUE_HH
 
 #include <memory>
+#include <vector>
 #include <string>
 #include <cstdint>
 
@@ -18,8 +19,12 @@ enum class value_type
 	INTEGER,
 	REAL,
 	STRING,
-	FUNC
+	FUNC,
+	NATIVE_FUNC
 };
+
+class value;
+typedef value (*native_func)(std::vector<value>);
 
 class value
 {
@@ -30,6 +35,7 @@ public:
 	explicit value(bool v);
 	explicit value(const std::string &v);
 	explicit value(std::shared_ptr<node> params, std::shared_ptr<node> stmt);
+	explicit value(native_func func);
 
 	value(const value &v);
 	value& operator=(const value &rhs);
@@ -49,6 +55,7 @@ public:
 	bool isBoolean() const;
 	bool isString() const;
 	bool isFunc() const;
+	bool isNativeFunc() const;
 
 	bool isTrue() const;
 	bool isFalse() const;
@@ -58,6 +65,7 @@ public:
 	bool toBoolean() const;
 	std::string toString() const;
 	func toFunc() const;
+	native_func toNativeFunc() const;
 
 	value Add(const value &rhs) const;
 	value Sub(const value &rhs) const;
@@ -86,6 +94,11 @@ struct func
 {
 	std::shared_ptr<node> params;
 	std::shared_ptr<node> stmt;
+
+	explicit func():
+		params(),
+		stmt()
+	{}
 
 	explicit func(std::shared_ptr<node> params, std::shared_ptr<node> stmt):
 		params(params),

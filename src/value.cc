@@ -38,6 +38,11 @@ value::value(std::shared_ptr<node> params, std::shared_ptr<node> stmt):
 	m_val(reinterpret_cast<intptr_t>(new func(params, stmt)))
 {}
 
+value::value(native_func func):
+	m_type(value_type::NATIVE_FUNC),
+	m_val(reinterpret_cast<intptr_t>(func))
+{}
+
 value::value(const value &v):
 	m_type(value_type::NIL),
 	m_val(0)
@@ -135,6 +140,11 @@ bool value::isString() const
 bool value::isFunc() const
 {
 	return m_type == value_type::FUNC;
+}
+
+bool value::isNativeFunc() const
+{
+	return m_type == value_type::NATIVE_FUNC;
 }
 
 bool value::isTrue() const
@@ -244,6 +254,11 @@ std::string value::toString() const
 		return "function";
 	}
 
+	if (isNativeFunc())
+	{
+		return "native function";
+	}
+
 	throw type_error();
 }
 
@@ -252,6 +267,16 @@ func value::toFunc() const
 	if (isFunc())
 	{
 		return *reinterpret_cast<func *>(m_val);
+	}
+
+	throw type_error();
+}
+
+native_func value::toNativeFunc() const
+{
+	if (isNativeFunc())
+	{
+		return *reinterpret_cast<native_func>(m_val);
 	}
 
 	throw type_error();

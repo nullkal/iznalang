@@ -4,11 +4,20 @@
 #include <unordered_map>
 #include <stdexcept>
 #include <memory>
+#include <cmath>
+
+#include <GL/glew.h>
+#include <GL/glut.h>
 
 #include "scope.hh"
 #include "parser.hh"
 #include "value.hh"
 #include "exception.hh"
+
+#include "draw/input.h"
+#include "draw/texture.h"
+#include "draw/render_target.h"
+#include "draw/draw2d.h"
 
 namespace izna {
 
@@ -25,6 +34,40 @@ void pushScope()
 void popScope()
 {
 	cur_scope = cur_scope->m_prev;
+}
+
+value eval_tree(std::shared_ptr<node> node);
+
+value ExecFunc(value func_val, std::vector<value> &&args)
+{
+	pushScope();
+
+	value result;
+	if (func_val.isFunc())
+	{
+		auto f = func_val.toFunc();
+
+		auto cur_param = f.params;
+		auto cur_arg   = args.begin();
+		while (cur_param != nullptr)
+		{
+			cur_scope->setValue(cur_param->m_string, *cur_arg);
+			cur_param = cur_param->m_right;
+			++cur_arg;
+		}
+
+		result = eval_tree(f.stmt);
+	} else if (func_val.isNativeFunc())
+	{
+		auto f = func_val.toNativeFunc();
+		result = f(args);
+	} else
+	{
+		throw type_error();
+	}
+
+	popScope();
+	return result;
 }
 
 value eval_tree(std::shared_ptr<node> node)
@@ -136,18 +179,15 @@ value eval_tree(std::shared_ptr<node> node)
 		{
 			pushScope();
 
-			auto f = eval_tree(node->m_left).toFunc();
-
-			auto cur_param = f.params;
-			auto cur_arg   = node->m_right;
-			while (cur_param != nullptr)
+			std::vector<value> args;
+			auto cur_arg = node->m_right;
+			while (cur_arg != nullptr)
 			{
-				cur_scope->setValue(cur_param->m_string, eval_tree(cur_arg->m_left));
-				cur_param = cur_param->m_right;
-				cur_arg   = cur_arg->m_right;
+				args.push_back(eval_tree(cur_arg->m_left));
+				cur_arg = cur_arg->m_right;
 			}
 
-			auto result = eval_tree(f.stmt);
+			value result = ExecFunc(eval_tree(node->m_left), std::move(args));
 
 			popScope();
 			return result;
@@ -158,26 +198,161 @@ value eval_tree(std::shared_ptr<node> node)
 
 } //izna
 
+const int   WINDOW_WIDTH   = 800;
+const int   WINDOW_HEIGHT  = 600;
+const char *WINDOW_TITLE   = "iznagame";
+const int   TIMER_INTERVAL = 16;
+
+void Reshape(int w, int h);
+void Timer(int);
+
+bool InitResources();
+void Draw();
+
+std::vector<stg::Texture_ptr> g_textures;
+izna::value g_drawfunc;
+
 int main(int argc, char *argv[])
 {
-	std::string str(std::istreambuf_iterator<char>(std::cin), std::istreambuf_iterator<char>());
-	izna::parser_params params(str.c_str(), str.size());
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_STENCIL);
+	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-	izna::parser parser(params);
-	if (parser.parse() != 0 || !params.root)
+	glutCreateWindow(WINDOW_TITLE);
+	glutDisplayFunc(Draw);
+	glutReshapeFunc(Reshape);
+	glutTimerFunc(TIMER_INTERVAL, Timer, 0);
+
+	if (glewInit() != GLEW_OK)
 	{
-		std::cout << "Failed to parse the input file." << std::endl;
+		std::cerr << "ERROR: Failed to initialize GLEW" << std::endl;
 		return 1;
 	}
 
-	izna::pushScope();
-
-	izna::eval_tree(params.root);
-	for (auto &it: izna::cur_scope->m_var_table)
+	if (!GLEW_EXT_framebuffer_object)
 	{
-		std::cout << it.first << ": " << it.second.toString() << std::endl;
+		std::cerr << "ERROR: EXT_framebuffer_objet is not supported in this environment" << std::endl;
+		return 1;
+	}
+
+	stg::input::Init();
+	if (!InitResources())
+	{
+		return 1;
+	}
+
+	{
+		std::string str((std::istreambuf_iterator<char>(std::cin)), (std::istreambuf_iterator<char>()));
+		izna::parser_params params(str.c_str(), str.size());
+
+		izna::parser parser(params);
+		if (parser.parse() != 0 || !params.root)
+		{
+			std::cout << "Failed to parse the input file." << std::endl;
+			return 1;
+		}
+
+		izna::pushScope();
+
+		izna::cur_scope->setValue(
+			"LoadPNG",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+				g_textures.push_back(stg::LoadPNG(args[0].toString().c_str()));
+				return izna::value(static_cast<int>(g_textures.size() - 1));
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"MainLoop",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					g_drawfunc = args[0];
+					return izna::value();
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"Draw",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					stg::Drawer2D(
+						g_textures[args[0].toInteger()],
+						args[1].toInteger(),
+						args[2].toInteger()).Apply();
+					return izna::value();
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"Draw",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					stg::Drawer2D(
+						g_textures[args[0].toInteger()],
+						args[1].toInteger(),
+						args[2].toInteger()).Apply();
+					return izna::value();
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"sin",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					return izna::value(std::sin(args[0].toReal()));
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"cos",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					return izna::value(std::cos(args[0].toReal()));
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"tan",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					return izna::value(std::tan(args[0].toReal()));
+				})
+			);
+
+		izna::eval_tree(params.root);
+
+		glutMainLoop();
+		izna::popScope();
 	}
 
 	return 0;
 }
 
+
+void Reshape(int w, int h)
+{
+	if (w != WINDOW_WIDTH || h != WINDOW_HEIGHT)
+	{
+		glutReshapeWindow(WINDOW_WIDTH, WINDOW_HEIGHT);
+	}
+}
+
+void Timer(int)
+{
+	glutPostRedisplay();
+	glutTimerFunc(TIMER_INTERVAL, Timer, 0);
+}
+
+bool InitResources()
+{
+	return true;
+}
+
+void Draw()
+{
+	glClearColor(0, 0, 0, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	stg::Draw2D([](){
+		ExecFunc(g_drawfunc, std::vector<izna::value>());
+	});
+
+	glFlush();
+	glutSwapBuffers();
+
+	stg::input::Update();
+}

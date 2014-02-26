@@ -11,7 +11,18 @@ SET(SRCS
 	value.hh
 	value.cc
 	exception.hh
+	draw/input.h
+	draw/input-inl.h
+	draw/input.cpp
+	draw/texture.h
+	draw/texture-inl.h
+	draw/texture.cpp
+	draw/render_target.h
+	draw/render_target.cpp
+	draw/draw2d.h
+	draw/draw2d-inl.h
+	draw/draw2d.cpp
 	${BISON_IznaParser_OUTPUTS})
 
 ADD_EXECUTABLE(izna ${SRCS})
-
+target_link_libraries(izna ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${GLEW_LIBRARY} ${PNG_LIBRARY})
