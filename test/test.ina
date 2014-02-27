@@ -1,10 +1,20 @@
 test_img = LoadPNG("test.png")
 
-count = 0
+x = 96
+y = 96
 MainLoop(\() do
-  x = 400 + cos(1.0 * count / 600 * 6.28) * 300 - 64
-  y = 300 + sin(1.0 * count / 600 * 6.28) * 200 - 57
-  Draw(test_img, x, y)
+  if KeyIsHolded("UP")
+    y = y - 8
+  end
+  if KeyIsHolded("DOWN")
+    y = y + 8
+  end
+  if KeyIsHolded("LEFT")
+    x = x - 8
+  end
+  if KeyIsHolded("RIGHT")
+    x = x + 8
+  end
 
-  count = count + 1
+  Draw(test_img, x, y)
 end)

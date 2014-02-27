@@ -212,6 +212,34 @@ void Draw();
 std::vector<stg::Texture_ptr> g_textures;
 izna::value g_drawfunc;
 
+stg::input::Key GetKey(std::string str)
+{
+	if (str == "ESC")
+	{
+		return stg::input::Key::Esc();
+	}
+	else if(str == "UP")
+	{
+		return stg::input::Key::Up();
+	}
+	else if(str == "DOWN")
+	{
+		return stg::input::Key::Down();
+	}
+	else if(str == "LEFT")
+	{
+		return stg::input::Key::Left();
+	}
+	else if(str == "RIGHT")
+	{
+		return stg::input::Key::Right();
+	}
+	else
+	{
+		return stg::input::Key(str[0]);
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	glutInit(&argc, argv);
@@ -282,6 +310,27 @@ int main(int argc, char *argv[])
 			);
 
 		izna::cur_scope->setValue(
+			"KeyIsPushed",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					return izna::value(GetKey(args[0].toString()).IsPushed());
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"KeyIsHolded",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					return izna::value(GetKey(args[0].toString()).IsHolded());
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"KeyIsReleased",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					return izna::value(GetKey(args[0].toString()).IsReleased());
+				})
+			);
+
+		izna::cur_scope->setValue(
 			"Draw",
 			izna::value([](std::vector<izna::value> args) -> izna::value {
 					stg::Drawer2D(
@@ -291,6 +340,7 @@ int main(int argc, char *argv[])
 					return izna::value();
 				})
 			);
+
 
 		izna::cur_scope->setValue(
 			"sin",
