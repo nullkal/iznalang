@@ -1,7 +1,23 @@
-test_img = LoadPNG("test.png")
+rainbowdash = LoadPNG("rainbowdash.png")
+pinkiepie   = LoadPNG("pinkiepie.png")
+
+pinkie_arr = []
+AddPinkie  = \() do
+  print("Fun!! x" + ArraySize(pinkie_arr) + "\n")
+  ArrayPushBack(
+    pinkie_arr,
+    {
+      x : rand() * (800 - 64),
+      y : 320,
+      dy: -20,
+      origin_y: 320
+    }
+  )
+end
 
 x = 96
 y = 96
+count = 0
 MainLoop(\() do
   if KeyIsHolded("UP")
     y = y - 8
@@ -16,5 +32,22 @@ MainLoop(\() do
     x = x + 8
   end
 
-  Draw(test_img, x, y)
+  if count % 30 == 0
+    AddPinkie()
+  end
+
+  i = 0
+  while i < ArraySize(pinkie_arr)
+    Draw(pinkiepie, pinkie_arr[i]["x"], pinkie_arr[i]["y"])
+    pinkie_arr[i]["y"] = pinkie_arr[i]["y"] + pinkie_arr[i]["dy"]
+    if pinkie_arr[i]["y"] < pinkie_arr[i]["origin_y"]
+      pinkie_arr[i]["dy"] = pinkie_arr[i]["dy"] + 1
+    else
+      pinkie_arr[i]["dy"] = -20
+    end
+    i = i + 1
+  end
+
+  Draw(rainbowdash, x, y)
+  count = count + 1
 end)

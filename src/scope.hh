@@ -17,17 +17,17 @@ struct scope {
 		m_var_table()
 	{}
 
-	value getValue(const std::string &name)
+	value *getValue(const std::string &name)
 	{
 		auto var = m_var_table.find(name);
 		if (var != m_var_table.end())
 		{
-			return var->second;
+			return &var->second;
 		}
 
 		if (!m_prev)
 		{
-			return value();
+			return nullptr;
 		} else
 		{
 			return m_prev->getValue(name);

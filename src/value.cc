@@ -43,25 +43,51 @@ value::value(native_func func):
 	m_val(reinterpret_cast<intptr_t>(func))
 {}
 
+value::value(const std::vector<value> &arr):
+	m_type(value_type::ARRAY),
+	m_val(reinterpret_cast<intptr_t>(new std::vector<value>(arr)))
+{}
+
+value::value(std::vector<value> &&arr):
+	m_type(value_type::ARRAY),
+	m_val(reinterpret_cast<intptr_t>(new std::vector<value>(arr)))
+{}
+
+value::value(const std::unordered_map<std::string, value> &arr):
+	m_type(value_type::OBJECT),
+	m_val(reinterpret_cast<intptr_t>(new std::unordered_map<std::string, value>(arr)))
+{}
+
+value::value(std::unordered_map<std::string, value> &&arr):
+	m_type(value_type::OBJECT),
+	m_val(reinterpret_cast<intptr_t>(new std::unordered_map<std::string, value>(arr)))
+{}
+
+value::value(value *ref):
+	m_type(value_type::REF),
+	m_val(reinterpret_cast<intptr_t>(ref))
+{}
+
 value::value(const value &v):
 	m_type(value_type::NIL),
 	m_val(0)
 {
-	if (v.isReal())
+	m_val = v.m_val;
+	if (!v.isRef())
 	{
-		auto val = reinterpret_cast<double *>(v.m_val);
-		m_val = reinterpret_cast<intptr_t>(new double(*val));
-	} else if (v.isString())
-	{
-		auto val = reinterpret_cast<std::string *>(v.m_val);
-		m_val = reinterpret_cast<intptr_t>(new std::string(*val));
-	} else if (v.isFunc())
-	{
-		auto val = reinterpret_cast<func *>(v.m_val);
-		m_val = reinterpret_cast<intptr_t>(new func(*val));
-	} else
-	{
-		m_val = v.m_val;
+		if (v.isReal())
+		{
+			auto val = reinterpret_cast<double *>(v.m_val);
+			m_val = reinterpret_cast<intptr_t>(new double(*val));
+		} else if (v.isString())
+		{
+			auto val = reinterpret_cast<std::string *>(v.m_val);
+			m_val = reinterpret_cast<intptr_t>(new std::string(*val));
+		} else if (v.isFunc())
+		{
+			auto val = reinterpret_cast<func *>(v.m_val);
+			m_val = reinterpret_cast<intptr_t>(new func(*val));
+		}
 	}
 
 	m_type = v.m_type;
@@ -96,69 +122,171 @@ void value::swap(value &b) noexcept
 
 value::~value()
 {
-	if (isReal())
+	if (!isRef())
 	{
-		delete reinterpret_cast<double *>(m_val);
-	}
+		if (isReal())
+		{
+			delete reinterpret_cast<double *>(m_val);
+		}
 
-	if (isString())
-	{
-		delete reinterpret_cast<std::string *>(m_val);
-	}
+		if (isString())
+		{
+			delete reinterpret_cast<std::string *>(m_val);
+		}
 
-	if (isFunc())
-	{
-		delete reinterpret_cast<func *>(m_val);
+		if (isFunc())
+		{
+			delete reinterpret_cast<func *>(m_val);
+		}
 	}
 }
 
 bool value::isNil() const
 {
-	return m_type == value_type::NIL;
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->isNil();
+	}
+	else
+	{
+		return m_type == value_type::NIL;
+	}
 }
 
 bool value::isInteger() const
 {
-	return m_type == value_type::INTEGER;
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->isInteger();
+	}
+	else
+	{
+		return m_type == value_type::INTEGER;
+	}
 }
 
 bool value::isReal() const
 {
-	return m_type == value_type::REAL;
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->isReal();
+	}
+	else
+	{
+		return m_type == value_type::REAL;
+	}
 }
 
 bool value::isBoolean() const
 {
-	return m_type == value_type::BOOLEAN;
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->isBoolean();
+	}
+	else
+	{
+		return m_type == value_type::BOOLEAN;
+	}
 }
 
 bool value::isString() const
 {
-	return m_type == value_type::STRING;
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->isString();
+	}
+	else
+	{
+		return m_type == value_type::STRING;
+	}
 }
 
 bool value::isFunc() const
 {
-	return m_type == value_type::FUNC;
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->isFunc();
+	}
+	else
+	{
+		return m_type == value_type::FUNC;
+	}
 }
 
 bool value::isNativeFunc() const
 {
-	return m_type == value_type::NATIVE_FUNC;
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->isNativeFunc();
+	}
+	else
+	{
+		return m_type == value_type::NATIVE_FUNC;
+	}
 }
+
+
 
 bool value::isTrue() const
 {
-	return m_type == value_type::BOOLEAN && m_val;
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->isTrue();
+	}
+	else
+	{
+		return m_type == value_type::BOOLEAN && m_val;
+	}
+}
+
+bool value::isRef() const
+{
+	return m_type == value_type::REF;
+}
+
+bool value::isArray() const
+{
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->isArray();
+	}
+	else
+	{
+		return m_type == value_type::ARRAY;
+	}
+}
+
+bool value::isObject() const
+{
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->isObject();
+	}
+	else
+	{
+		return m_type == value_type::OBJECT;
+	}
 }
 
 bool value::isFalse() const
 {
-	return m_type == value_type::BOOLEAN && !m_val;
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->isFalse();
+	}
+	else
+	{
+		return m_type == value_type::BOOLEAN && !m_val;
+	}
 }
 
 int value::toInteger() const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->toInteger();
+	}
+
 	if (isInteger())
 	{
 		return m_val;
@@ -174,6 +302,11 @@ int value::toInteger() const
 
 double value::toReal() const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->toReal();
+	}
+
 	if (isInteger())
 	{
 		return static_cast<double>(m_val);
@@ -189,6 +322,11 @@ double value::toReal() const
 
 bool value::toBoolean() const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->toBoolean();
+	}
+
 	if (isNil())
 	{
 		return false;
@@ -219,6 +357,11 @@ bool value::toBoolean() const
 
 std::string value::toString() const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->toString();
+	}
+
 	if (isNil())
 	{
 		return "nil";
@@ -259,11 +402,52 @@ std::string value::toString() const
 		return "native function";
 	}
 
+	if (isArray())
+	{
+		auto &arr = toArray();
+		
+		auto str = std::string("[");
+		for (auto it = arr.begin(); it != arr.end(); ++it)
+		{
+			str += it->toString();
+			if (std::next(it) != arr.end())
+			{
+				str += ", ";
+			}
+		}
+		str += "]";
+
+		return str;
+	}
+
+	if (isObject())
+	{
+		auto &obj = toUnorderedMap();
+		
+		auto str = std::string("{");
+		for (auto it = obj.begin(); it != obj.end(); ++it)
+		{
+			str += std::string("\"") + it->first + "\": " + it->second.toString();
+			if (std::next(it) != obj.end())
+			{
+				str += ", ";
+			}
+		}
+		str += "}";
+
+		return str;
+	}
+
 	throw type_error();
 }
 
 func value::toFunc() const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->toFunc();
+	}
+
 	if (isFunc())
 	{
 		return *reinterpret_cast<func *>(m_val);
@@ -274,12 +458,52 @@ func value::toFunc() const
 
 native_func value::toNativeFunc() const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->toNativeFunc();
+	}
+
 	if (isNativeFunc())
 	{
 		return *reinterpret_cast<native_func>(m_val);
 	}
 
 	throw type_error();
+}
+
+std::vector<value> &value::toArray() const
+{
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->toArray();
+	}
+
+	if (isArray())
+	{
+		return *reinterpret_cast<std::vector<value> *>(m_val);
+	}
+
+	throw type_error();
+}
+
+std::unordered_map<std::string, value> &value::toUnorderedMap() const
+{
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->toUnorderedMap();
+	}
+
+	if (isObject())
+	{
+		return *reinterpret_cast<std::unordered_map<std::string, value> *>(m_val);
+	}
+
+	throw type_error();
+}
+
+value &value::toRef() const
+{
+	return *reinterpret_cast<value *>(m_val);
 }
 
 
@@ -291,16 +515,57 @@ native_func value::toNativeFunc() const
 
 value value::Add(const value &rhs) const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->Add(rhs);
+	}
+
 	ADD_OPERATE(Boolean, +)
 	ADD_OPERATE(Integer, +)
 	ADD_OPERATE(Real, +)
 	ADD_OPERATE(String, +)
+
+	if (isArray())
+	{
+		std::vector<value> new_v(toArray());
+		if (rhs.isArray())
+		{
+			auto &rhs_arr = rhs.toArray();
+			new_v.insert(new_v.end(), rhs_arr.begin(), rhs_arr.end());
+		}
+		else
+		{
+			new_v.push_back(rhs);
+		}
+
+		return value(std::move(new_v));
+	}
+
+	if (isObject())
+	{
+		std::unordered_map<std::string, value> new_m(toUnorderedMap());
+		if (rhs.isObject())
+		{
+			auto &rhs_map = rhs.toUnorderedMap();
+			new_m.insert(rhs_map.begin(), rhs_map.end());
+		}
+		else
+		{
+			throw type_error();
+		}
+		return value(std::move(new_m));
+	}
 
 	throw type_error();
 }
 
 value value::Sub(const value &rhs) const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->Sub(rhs);
+	}
+
 	ADD_OPERATE(Boolean, -)
 	ADD_OPERATE(Integer, -)
 	ADD_OPERATE(Real, -)
@@ -310,6 +575,11 @@ value value::Sub(const value &rhs) const
 
 value value::Mul(const value &rhs) const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->Mul(rhs);
+	}
+
 	ADD_OPERATE(Boolean, *)
 	ADD_OPERATE(Integer, *)
 	ADD_OPERATE(Real, *)
@@ -328,11 +598,30 @@ value value::Mul(const value &rhs) const
 		return value(ss.str());
 	}
 
+	if (isArray())
+	{
+		const int n = rhs.toInteger();
+		auto arr = toArray();
+
+		std::vector<value> new_v;
+		for (int i = 0; i < n; ++i)
+		{
+			new_v.insert(new_v.end(), arr.begin(), arr.end());
+		}
+
+		return value(new_v);
+	}
+
 	throw type_error();
 }
 
 value value::Div(const value &rhs) const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->Div(rhs);
+	}
+
 	ADD_OPERATE(Boolean, /)
 	ADD_OPERATE(Integer, /)
 	ADD_OPERATE(Real, /)
@@ -342,6 +631,11 @@ value value::Div(const value &rhs) const
 
 value value::Mod(const value &rhs) const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->Mod(rhs);
+	}
+
 	ADD_OPERATE(Boolean, %)
 	ADD_OPERATE(Integer, %)
 
@@ -350,16 +644,31 @@ value value::Mod(const value &rhs) const
 
 value value::LOr(const value &rhs) const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->LOr(rhs);
+	}
+
 	return value(toBoolean() || rhs.toBoolean());
 }
 
 value value::LAnd(const value &rhs) const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->LAnd(rhs);
+	}
+
 	return value(toBoolean() && rhs.toBoolean());
 }
 
 value value::Eq(const value &rhs) const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->Eq(rhs);
+	}
+
 	ADD_OPERATE(Boolean, ==)
 	ADD_OPERATE(Integer, ==)
 	ADD_OPERATE(Real, ==)
@@ -370,6 +679,11 @@ value value::Eq(const value &rhs) const
 
 value value::Ne(const value &rhs) const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->Ne(rhs);
+	}
+
 	ADD_OPERATE(Boolean, !=)
 	ADD_OPERATE(Integer, !=)
 	ADD_OPERATE(Real, !=)
@@ -380,6 +694,11 @@ value value::Ne(const value &rhs) const
 
 value value::Less(const value &rhs) const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->Less(rhs);
+	}
+
 	ADD_OPERATE(Boolean, <)
 	ADD_OPERATE(Integer, <)
 	ADD_OPERATE(Real, <)
@@ -390,6 +709,11 @@ value value::Less(const value &rhs) const
 
 value value::LessEq(const value &rhs) const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->LessEq(rhs);
+	}
+
 	ADD_OPERATE(Boolean, <=)
 	ADD_OPERATE(Integer, <=)
 	ADD_OPERATE(Real, <=)
@@ -400,6 +724,11 @@ value value::LessEq(const value &rhs) const
 
 value value::Greater(const value &rhs) const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->Greater(rhs);
+	}
+
 	ADD_OPERATE(Boolean, >)
 	ADD_OPERATE(Integer, >)
 	ADD_OPERATE(Real, >)
@@ -410,6 +739,11 @@ value value::Greater(const value &rhs) const
 
 value value::GreaterEq(const value &rhs) const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->GreaterEq(rhs);
+	}
+
 	ADD_OPERATE(Boolean, >=)
 	ADD_OPERATE(Integer, >=)
 	ADD_OPERATE(Real, >=)
@@ -420,6 +754,11 @@ value value::GreaterEq(const value &rhs) const
 
 value value::Neg() const
 {
+	if (isRef())
+	{
+		return reinterpret_cast<value *>(m_val)->Neg();
+	}
+
 	if (isInteger())
 	{
 		return value(-toInteger());
@@ -430,6 +769,24 @@ value value::Neg() const
 		return value(-toReal());
 	}
 
+	throw type_error();
+}
+
+value value::Assign(const value &rhs) const
+{
+	if (isRef())
+	{
+		if (rhs.isRef())
+		{
+			*reinterpret_cast<value *>(m_val) = rhs.toRef();
+		}
+		else
+		{
+			*reinterpret_cast<value *>(m_val) = rhs;
+		}
+		return *this;
+	}
+	
 	throw type_error();
 }
 

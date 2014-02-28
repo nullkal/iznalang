@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <unordered_map>
 #include <string>
 #include <cstdint>
 
@@ -14,13 +15,15 @@ struct func;
 enum class value_type
 {
 	NIL,
-
 	BOOLEAN,
 	INTEGER,
 	REAL,
 	STRING,
 	FUNC,
-	NATIVE_FUNC
+	NATIVE_FUNC,
+	ARRAY,
+	OBJECT,
+	REF,
 };
 
 class value;
@@ -36,6 +39,11 @@ public:
 	explicit value(const std::string &v);
 	explicit value(std::shared_ptr<node> params, std::shared_ptr<node> stmt);
 	explicit value(native_func func);
+	explicit value(const std::vector<value> &arr);
+	explicit value(std::vector<value> &&arr);
+	explicit value(const std::unordered_map<std::string, value> &arr);
+	explicit value(std::unordered_map<std::string, value> &&arr);
+	explicit value(value *ref);
 
 	value(const value &v);
 	value& operator=(const value &rhs);
@@ -56,6 +64,9 @@ public:
 	bool isString() const;
 	bool isFunc() const;
 	bool isNativeFunc() const;
+	bool isArray() const;
+	bool isObject() const;
+	bool isRef() const;
 
 	bool isTrue() const;
 	bool isFalse() const;
@@ -66,6 +77,9 @@ public:
 	std::string toString() const;
 	func toFunc() const;
 	native_func toNativeFunc() const;
+	std::vector<value> &toArray() const;
+	std::unordered_map<std::string, value> &toUnorderedMap() const;
+	value &toRef() const;
 
 	value Add(const value &rhs) const;
 	value Sub(const value &rhs) const;
@@ -84,6 +98,8 @@ public:
 	value GreaterEq(const value &rhs) const;
 
 	value Neg() const;
+
+	value Assign(const value &rhs) const;
 
 private:
 	value_type m_type;

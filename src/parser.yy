@@ -96,8 +96,6 @@ parser::token_type yylex(
 %type  <std::shared_ptr<node>>  stmt
 %type  <std::shared_ptr<node>>  expr
 
-%type  <std::string>            lvalue
-
 %type  <std::shared_ptr<node>>  if_stmt
 %type  <std::shared_ptr<node>>  opt_elsifs
 %type  <std::shared_ptr<node>>  elsif
@@ -114,6 +112,9 @@ parser::token_type yylex(
 %type  <std::shared_ptr<node>>  args
 %type  <std::shared_ptr<node>>  opt_params
 %type  <std::shared_ptr<node>>  params
+%type  <std::shared_ptr<node>>  opt_objelems
+%type  <std::shared_ptr<node>>  objelems
+%type  <std::shared_ptr<node>>  objelem
 
 %right '='
 %left  LOGICAL_OR
@@ -177,21 +178,24 @@ expr : expr '+' opt_newlines expr         { $$ = std::make_shared<node>(OP_ADD  
 	 | expr LESS_EQ opt_newlines expr     { $$ = std::make_shared<node>(OP_LESS_EQ    , $1, $4); }
 	 | expr GREATER    opt_newlines expr  { $$ = std::make_shared<node>(OP_GREATER    , $1, $4); }
 	 | expr GREATER_EQ opt_newlines expr  { $$ = std::make_shared<node>(OP_GREATER_EQ , $1, $4); }
-	 | lvalue '=' opt_newlines expr       { $$ = std::make_shared<node>(OP_ASSIGN     , $1, $4); }
+	 | expr '=' opt_newlines expr         { $$ = std::make_shared<node>(OP_ASSIGN     , $1, $4); }
 	 | '-' opt_newlines expr %prec NEG    { $$ = std::make_shared<node>(OP_NEG        , $3); }
 	 | expr '(' opt_newlines opt_args opt_newlines ')' %prec EXEC_FUNC
 			{ $$ = std::make_shared<node>(OP_EXECFUNC, $1, $4); }
 	 | '(' opt_newlines expr opt_newlines ')'          { $$ = $3; }
-	 | lvalue                { $$ = std::make_shared<node>(OP_VALUE, $1); }
+	 | "identifier"          { $$ = std::make_shared<node>(OP_IDENTIFIER, $1); }
 	 | "integer"             { $$ = std::make_shared<node>(OP_CONST, value($1)); }
 	 | "real"                { $$ = std::make_shared<node>(OP_CONST, value($1)); }
 	 | "string"              { $$ = std::make_shared<node>(OP_CONST, value($1)); }
+	 | '[' opt_newlines opt_args opt_newlines ']'
+			{ $$ = std::make_shared<node>(OP_ARRAY, $3); }
+	 | '{' opt_newlines opt_objelems opt_newlines '}'
+			{ $$ = std::make_shared<node>(OP_OBJECT, $3); }
+	 | expr '[' opt_newlines expr opt_newlines ']'
+			{ $$ = std::make_shared<node>(OP_INDEX, $1, $4); }
 	 | '\\' '(' opt_newlines opt_params opt_newlines ')' do_stmt
-	 		{ $$ = std::make_shared<node>(OP_CONST, value($4, $7)); }
+			{ $$ = std::make_shared<node>(OP_CONST, value($4, $7)); }
 	 ;
-
-lvalue: "identifier" { $$ = $1; }
-	  ;
 
 do_stmt: DO term compstmt term END { $$ = $3; }
 	   | stmt { $$ = $1; }
@@ -253,8 +257,8 @@ opt_params:        { $$ = nullptr; }
 		  | params { $$ = $1; }
 		  ;
 
-params: lvalue                         { $$ = std::make_shared<node>(OP_PARAM, $1); }
-	  | lvalue ',' opt_newlines params { $$ = std::make_shared<node>(OP_PARAM, $1, $4); }
+params: "identifier"                         { $$ = std::make_shared<node>(OP_PARAM, $1); }
+	  | "identifier" ',' opt_newlines params { $$ = std::make_shared<node>(OP_PARAM, $1, $4); }
 	  ;
 
 opt_args:      { $$ = nullptr; }
@@ -264,6 +268,19 @@ opt_args:      { $$ = nullptr; }
 args: expr                       { $$ = std::make_shared<node>(OP_ARG, $1); }
 	| expr ',' opt_newlines args { $$ = std::make_shared<node>(OP_ARG, $1, $4); }
 	;
+
+opt_objelems:          { $$ = nullptr; }
+			| objelems { $$ = $1; }
+			;
+
+objelems: objelem                           { $$ = std::make_shared<node>(OP_ARG, $1); }
+		| objelem ',' opt_newlines objelems { $$ = std::make_shared<node>(OP_ARG, $1, $4); }
+		;
+
+objelem: "identifier" ':' expr { $$ = std::make_shared<node>(OP_OBJELEM, $1, $3); }
+	   | "string"     ':' expr { $$ = std::make_shared<node>(OP_OBJELEM, $1, $3); }
+	   ;
+
 
 %%
 

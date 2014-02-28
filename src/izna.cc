@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <stdexcept>
 #include <memory>
+#include <random>
 #include <cmath>
 
 #include <GL/glew.h>
@@ -118,17 +119,22 @@ value eval_tree(std::shared_ptr<node> node)
 		return eval_tree(node->m_left).GreaterEq(eval_tree(node->m_right));
 
 	case OP_ASSIGN:
-		{
-			auto v = eval_tree(node->m_right);
-			cur_scope->setValue(node->m_string, v);
-			return v;
-		}
+		return eval_tree(node->m_left).Assign(eval_tree(node->m_right));
 
 	case OP_NEG:
 		return eval_tree(node->m_left).Neg();
 
-	case OP_VALUE:
-		return cur_scope->getValue(node->m_string);
+	case OP_IDENTIFIER:
+		{
+			auto v = cur_scope->getValue(node->m_string);
+			if (!v)
+			{
+				cur_scope->setValue(node->m_string, value());
+				v = cur_scope->getValue(node->m_string);
+			}
+
+			return value(v);
+		}
 
 	case OP_CONST:
 		return *(node->m_value);
@@ -191,6 +197,46 @@ value eval_tree(std::shared_ptr<node> node)
 
 			popScope();
 			return result;
+		}
+	case OP_ARRAY:
+		{
+			std::vector<value> arr;
+
+			auto cur_elem = node->m_left;
+			while (cur_elem != nullptr)
+			{
+				arr.push_back(eval_tree(cur_elem->m_left));
+				cur_elem = cur_elem->m_right;
+			}
+
+			return value(std::move(arr));
+		}
+	case OP_OBJECT:
+		{
+			std::unordered_map<std::string, value> obj;
+
+			auto cur_elem = node->m_left;
+			while (cur_elem != nullptr)
+			{
+				obj[cur_elem->m_left->m_string] = eval_tree(cur_elem->m_left->m_right);
+				cur_elem = cur_elem->m_right;
+			}
+
+			return value(std::move(obj));
+		}
+	case OP_INDEX:
+		{
+			auto lv = eval_tree(node->m_left);
+			if (lv.isArray())
+			{
+				auto &arr = lv.toArray();
+				return value(&arr[eval_tree(node->m_right).toInteger()]);
+			}
+			else if (lv.isObject())
+			{
+				auto &obj = lv.toUnorderedMap();
+				return value(&obj[eval_tree(node->m_right).toString()]);
+			}
 		}
 	}
 	return value();
@@ -283,10 +329,18 @@ int main(int argc, char *argv[])
 		izna::pushScope();
 
 		izna::cur_scope->setValue(
+			"print",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					std::cout << args[0].toString();
+					return izna::value();
+				})
+			);
+
+		izna::cur_scope->setValue(
 			"LoadPNG",
 			izna::value([](std::vector<izna::value> args) -> izna::value {
-				g_textures.push_back(stg::LoadPNG(args[0].toString().c_str()));
-				return izna::value(static_cast<int>(g_textures.size() - 1));
+					g_textures.push_back(stg::LoadPNG(args[0].toString().c_str()));
+					return izna::value(static_cast<int>(g_textures.size() - 1));
 				})
 			);
 
@@ -360,6 +414,31 @@ int main(int argc, char *argv[])
 			"tan",
 			izna::value([](std::vector<izna::value> args) -> izna::value {
 					return izna::value(std::tan(args[0].toReal()));
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"rand",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					static std::mt19937 mt;
+
+					std::uniform_real_distribution<double> rand_range(0.0, 1.0);
+					return izna::value(rand_range(mt));
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"ArraySize",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					return izna::value(static_cast<int>(args[0].toArray().size()));
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"ArrayPushBack",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					args[0].toArray().push_back(args[1]);
+					return izna::value();
 				})
 			);
 
