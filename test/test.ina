@@ -17,16 +17,16 @@ y = 96
 count = 0
 MainLoop(\() do
   if KeyIsHolded("UP")
-    y = y - 8
+    y -= 8
   end
   if KeyIsHolded("DOWN")
-    y = y + 8
+    y += 8
   end
   if KeyIsHolded("LEFT")
-    x = x - 8
+    x -= 8
   end
   if KeyIsHolded("RIGHT")
-    x = x + 8
+    x += 8
   end
 
   if count % 30 == 0
@@ -46,5 +46,5 @@ MainLoop(\() do
   end
 
   Draw(rainbowdash, x, y)
-  count = count + 1
+  count += 1
 end)

@@ -79,6 +79,14 @@ parser::token_type yylex(
 %token               LOGICAL_OR   "||"
 %token               LOGICAL_AND  "&&"
 
+%token               PLUS_EQ      "+="
+%token               MINUS_EQ     "-="
+%token               ASTERISK_EQ  "*="
+%token               SLASH_EQ     "/="
+%token               PERCENT_EQ   "%="
+%token               BAR_EQ       "|="
+%token               AND_EQ       "&="
+
 %token               END          "end"
 
 %token               DO           "do"
@@ -179,7 +187,50 @@ expr : expr '+' opt_newlines expr         { $$ = std::make_shared<node>(OP_ADD  
 	 | expr LESS_EQ opt_newlines expr     { $$ = std::make_shared<node>(OP_LESS_EQ    , $1, $4); }
 	 | expr GREATER    opt_newlines expr  { $$ = std::make_shared<node>(OP_GREATER    , $1, $4); }
 	 | expr GREATER_EQ opt_newlines expr  { $$ = std::make_shared<node>(OP_GREATER_EQ , $1, $4); }
-	 | expr '=' opt_newlines expr         { $$ = std::make_shared<node>(OP_ASSIGN     , $1, $4); }
+	 | expr '='  opt_newlines expr        { $$ = std::make_shared<node>(OP_ASSIGN     , $1, $4); }
+	 | expr PLUS_EQ opt_newlines expr {
+			$$ = std::make_shared<node>(
+				OP_ASSIGN,
+				$1,
+				std::make_shared<node>(OP_ADD, $1, $4));
+		}
+	 | expr MINUS_EQ opt_newlines expr {
+			$$ = std::make_shared<node>(
+				OP_ASSIGN,
+				$1,
+				std::make_shared<node>(OP_SUBTRACT, $1, $4));
+		}
+	 | expr ASTERISK_EQ opt_newlines expr {
+			$$ = std::make_shared<node>(
+				OP_ASSIGN,
+				$1,
+				std::make_shared<node>(OP_MULTIPLY, $4));
+		}
+	 | expr SLASH_EQ opt_newlines expr {
+			$$ = std::make_shared<node>(
+				OP_ASSIGN,
+				$1,
+				std::make_shared<node>(OP_DIVIDE, $1, $4));
+		}
+	 | expr PERCENT_EQ opt_newlines expr {
+			$$ = std::make_shared<node>(
+				OP_ASSIGN,
+				$1,
+				std::make_shared<node>(OP_MODULO, $1, $4));
+		}
+	 | expr BAR_EQ opt_newlines expr {
+			$$ = std::make_shared<node>(
+				OP_LOGICAL_OR,
+				$1,
+				std::make_shared<node>(OP_SUBTRACT, $1, $4));
+		}
+	 | expr AND_EQ opt_newlines expr {
+			$$ = std::make_shared<node>(
+				OP_LOGICAL_AND,
+				$1,
+				std::make_shared<node>(OP_SUBTRACT, $1, $4));
+		}
+
 	 | '-' opt_newlines expr %prec NEG    { $$ = std::make_shared<node>(OP_NEG        , $3); }
 	 | expr '(' opt_newlines opt_args opt_newlines ')' %prec EXEC_FUNC
 			{ $$ = std::make_shared<node>(OP_EXECFUNC, $1, $4); }
@@ -514,6 +565,41 @@ parser::token_type yylex(
 
 		yylval->build<std::string>() = buf;
 		return parser::token::STRING;
+	}
+
+	if (chk.DiscardIfInputIs("+="))
+	{
+		return parser::token::PLUS_EQ;
+	}
+
+	if (chk.DiscardIfInputIs("-="))
+	{
+		return parser::token::MINUS_EQ;
+	}
+
+	if (chk.DiscardIfInputIs("*="))
+	{
+		return parser::token::ASTERISK_EQ;
+	}
+
+	if (chk.DiscardIfInputIs("/="))
+	{
+		return parser::token::SLASH_EQ;
+	}
+
+	if (chk.DiscardIfInputIs("%="))
+	{
+		return parser::token::PERCENT_EQ;
+	}
+
+	if (chk.DiscardIfInputIs("|="))
+	{
+		return parser::token::BAR_EQ;
+	}
+
+	if (chk.DiscardIfInputIs("&="))
+	{
+		return parser::token::AND_EQ;
 	}
 
 	if (chk.DiscardIfInputIs("||"))
