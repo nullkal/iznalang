@@ -95,6 +95,7 @@ parser::token_type yylex(
 %type  <std::shared_ptr<node>>  compstmt
 %type  <std::shared_ptr<node>>  stmt
 %type  <std::shared_ptr<node>>  expr
+%type  <std::shared_ptr<node>>  opt_expr
 
 %type  <std::shared_ptr<node>>  if_stmt
 %type  <std::shared_ptr<node>>  opt_elsifs
@@ -191,11 +192,15 @@ expr : expr '+' opt_newlines expr         { $$ = std::make_shared<node>(OP_ADD  
 			{ $$ = std::make_shared<node>(OP_ARRAY, $3); }
 	 | '{' opt_newlines opt_objelems opt_newlines '}'
 			{ $$ = std::make_shared<node>(OP_OBJECT, $3); }
-	 | expr '[' opt_newlines expr opt_newlines ']'
+	 | expr '[' opt_newlines opt_expr opt_newlines ']'
 			{ $$ = std::make_shared<node>(OP_INDEX, $1, $4); }
 	 | '\\' '(' opt_newlines opt_params opt_newlines ')' do_stmt
 			{ $$ = std::make_shared<node>(OP_CONST, value($4, $7)); }
 	 ;
+
+opt_expr: expr { $$ = $1; }
+		| { $$ = nullptr; }
+		;
 
 do_stmt: DO term compstmt term END { $$ = $3; }
 	   | stmt { $$ = $1; }

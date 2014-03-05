@@ -230,7 +230,21 @@ value eval_tree(std::shared_ptr<node> node)
 			if (lv.isArray())
 			{
 				auto &arr = lv.toArray();
-				return value(&arr[eval_tree(node->m_right).toInteger()]);
+
+				int rv_int;
+				if (node->m_right)
+				{
+					rv_int = eval_tree(node->m_right).toInteger();
+				} else
+				{
+					rv_int = arr.size();
+				}
+
+				if (arr.size() <= rv_int)
+				{
+					arr.resize(rv_int + 1);
+				}
+				return value(&arr[rv_int]);
 			}
 			else if (lv.isObject())
 			{
