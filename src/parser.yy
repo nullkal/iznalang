@@ -202,7 +202,7 @@ opt_expr: expr { $$ = $1; }
 		| { $$ = nullptr; }
 		;
 
-do_stmt: DO term compstmt term END { $$ = $3; }
+do_stmt: DO term compstmt terms END { $$ = $3; }
 	   | stmt { $$ = $1; }
 	   ;
 
