@@ -41,23 +41,28 @@ value eval_tree(std::shared_ptr<node> node);
 
 value ExecFunc(value func_val, std::vector<value> &&args)
 {
-	pushScope();
-
 	value result;
 	if (func_val.isFunc())
 	{
-		auto f = func_val.toFunc();
+		auto &f = func_val.toFunc();
 
-		auto cur_param = f.params;
-		auto cur_arg   = args.begin();
-		while (cur_param != nullptr)
+		auto previous_scope = cur_scope;
+		cur_scope = f.scope;
+		pushScope();
 		{
-			cur_scope->setValue(cur_param->m_string, *cur_arg);
-			cur_param = cur_param->m_right;
-			++cur_arg;
-		}
+			auto cur_param = f.params;
+			auto cur_arg   = args.begin();
+			while (cur_param != nullptr)
+			{
+				cur_scope->setValue(cur_param->m_string, *cur_arg);
+				cur_param = cur_param->m_right;
+				++cur_arg;
+			}
 
-		result = eval_tree(f.stmt);
+			result = eval_tree(f.stmt);
+		}
+		popScope();
+		cur_scope = previous_scope;
 	} else if (func_val.isNativeFunc())
 	{
 		auto f = func_val.toNativeFunc();
@@ -67,7 +72,6 @@ value ExecFunc(value func_val, std::vector<value> &&args)
 		throw type_error();
 	}
 
-	popScope();
 	return result;
 }
 
@@ -138,6 +142,14 @@ value eval_tree(std::shared_ptr<node> node)
 
 	case OP_CONST:
 		return *(node->m_value);
+
+	case OP_CLOSURE:
+		{
+			auto &func = node->m_value->toFunc();
+			func.scope = cur_scope;
+
+			return *(node->m_value);
+		}
 
 	case OP_CONTINUE:
 		eval_tree(node->m_left);

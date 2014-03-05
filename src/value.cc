@@ -38,9 +38,9 @@ value::value(std::shared_ptr<node> params, std::shared_ptr<node> stmt):
 	m_val(reinterpret_cast<intptr_t>(new func(params, stmt)))
 {}
 
-value::value(native_func func):
+value::value(native_func fun):
 	m_type(value_type::NATIVE_FUNC),
-	m_val(reinterpret_cast<intptr_t>(func))
+	m_val(reinterpret_cast<intptr_t>(fun))
 {}
 
 value::value(const std::vector<value> &arr):
@@ -441,7 +441,7 @@ std::string value::toString() const
 	throw type_error();
 }
 
-func value::toFunc() const
+func &value::toFunc() const
 {
 	if (isRef())
 	{

@@ -38,7 +38,7 @@ public:
 	explicit value(bool v);
 	explicit value(const std::string &v);
 	explicit value(std::shared_ptr<node> params, std::shared_ptr<node> stmt);
-	explicit value(native_func func);
+	explicit value(native_func fun);
 	explicit value(const std::vector<value> &arr);
 	explicit value(std::vector<value> &&arr);
 	explicit value(const std::unordered_map<std::string, value> &arr);
@@ -75,7 +75,7 @@ public:
 	double toReal() const;
 	bool toBoolean() const;
 	std::string toString() const;
-	func toFunc() const;
+	func &toFunc() const;
 	native_func toNativeFunc() const;
 	std::vector<value> &toArray() const;
 	std::unordered_map<std::string, value> &toUnorderedMap() const;
@@ -106,10 +106,13 @@ private:
 	std::intptr_t m_val;
 };
 
+struct scope;
 struct func
 {
 	std::shared_ptr<node> params;
 	std::shared_ptr<node> stmt;
+
+	std::shared_ptr<scope> scope;
 
 	explicit func():
 		params(),

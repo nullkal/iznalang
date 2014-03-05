@@ -85,7 +85,7 @@ parser::token_type yylex(
 %token               SLASH_EQ     "/="
 %token               PERCENT_EQ   "%="
 %token               BAR_EQ       "|="
-%token               AND_EQ       "&="
+%token               AMP_EQ       "&="
 
 %token               END          "end"
 
@@ -125,7 +125,7 @@ parser::token_type yylex(
 %type  <std::shared_ptr<node>>  objelems
 %type  <std::shared_ptr<node>>  objelem
 
-%right '='
+%right '=' PLUS_EQ MINUS_EQ ASTERISK_EQ SLASH_EQ PERCENT_EQ BAR_EQ AND_EQ
 %left  LOGICAL_OR
 %left  LOGICAL_AND
 %left  EQ NE LESS LESS_EQ GREATER GREATER_EQ
@@ -224,7 +224,7 @@ expr : expr '+' opt_newlines expr         { $$ = std::make_shared<node>(OP_ADD  
 				$1,
 				std::make_shared<node>(OP_SUBTRACT, $1, $4));
 		}
-	 | expr AND_EQ opt_newlines expr {
+	 | expr AMP_EQ opt_newlines expr {
 			$$ = std::make_shared<node>(
 				OP_LOGICAL_AND,
 				$1,
@@ -246,7 +246,7 @@ expr : expr '+' opt_newlines expr         { $$ = std::make_shared<node>(OP_ADD  
 	 | expr '[' opt_newlines opt_expr opt_newlines ']'
 			{ $$ = std::make_shared<node>(OP_INDEX, $1, $4); }
 	 | '\\' '(' opt_newlines opt_params opt_newlines ')' do_stmt
-			{ $$ = std::make_shared<node>(OP_CONST, value($4, $7)); }
+			{ $$ = std::make_shared<node>(OP_CLOSURE, value($4, $7)); }
 	 ;
 
 opt_expr: expr { $$ = $1; }
@@ -599,7 +599,7 @@ parser::token_type yylex(
 
 	if (chk.DiscardIfInputIs("&="))
 	{
-		return parser::token::AND_EQ;
+		return parser::token::AMP_EQ;
 	}
 
 	if (chk.DiscardIfInputIs("||"))
