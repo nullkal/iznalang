@@ -60,3 +60,4 @@ MainLoop(\() do
   Draw(rainbowdash, x, y)
   count += 1
 end)
+

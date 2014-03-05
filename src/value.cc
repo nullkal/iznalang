@@ -506,11 +506,22 @@ value &value::toRef() const
 	return *reinterpret_cast<value *>(m_val);
 }
 
-
 #define ADD_OPERATE(type, opr) \
 	if (is##type())\
 	{\
 		return value(this->to##type() opr rhs.to##type());\
+	}
+
+#define DEFAULT_PRIORITY(opr) \
+	if (isReal() || rhs.isReal())\
+	{\
+		return value(this->toReal() opr rhs.toReal());\
+	} else if (isInteger() || rhs.isInteger())\
+	{\
+		return value(this->toInteger() opr rhs.toInteger());\
+	} else if (isBoolean() || rhs.isBoolean())\
+	{\
+		return value(this->toBoolean() opr rhs.toBoolean());\
 	}
 
 value value::Add(const value &rhs) const
@@ -519,11 +530,6 @@ value value::Add(const value &rhs) const
 	{
 		return reinterpret_cast<value *>(m_val)->Add(rhs);
 	}
-
-	ADD_OPERATE(Boolean, +)
-	ADD_OPERATE(Integer, +)
-	ADD_OPERATE(Real, +)
-	ADD_OPERATE(String, +)
 
 	if (isArray())
 	{
@@ -556,6 +562,13 @@ value value::Add(const value &rhs) const
 		return value(std::move(new_m));
 	}
 
+	if (isString() || rhs.isString())
+	{
+		return value(this->toString() + rhs.toString());
+	}
+
+	DEFAULT_PRIORITY(+)
+
 	throw type_error();
 }
 
@@ -566,9 +579,7 @@ value value::Sub(const value &rhs) const
 		return reinterpret_cast<value *>(m_val)->Sub(rhs);
 	}
 
-	ADD_OPERATE(Boolean, -)
-	ADD_OPERATE(Integer, -)
-	ADD_OPERATE(Real, -)
+	DEFAULT_PRIORITY(-)
 
 	throw type_error();
 }
@@ -579,10 +590,6 @@ value value::Mul(const value &rhs) const
 	{
 		return reinterpret_cast<value *>(m_val)->Mul(rhs);
 	}
-
-	ADD_OPERATE(Boolean, *)
-	ADD_OPERATE(Integer, *)
-	ADD_OPERATE(Real, *)
 
 	if (isString())
 	{
@@ -612,6 +619,8 @@ value value::Mul(const value &rhs) const
 		return value(new_v);
 	}
 
+	DEFAULT_PRIORITY(*)
+
 	throw type_error();
 }
 
@@ -622,9 +631,7 @@ value value::Div(const value &rhs) const
 		return reinterpret_cast<value *>(m_val)->Div(rhs);
 	}
 
-	ADD_OPERATE(Boolean, /)
-	ADD_OPERATE(Integer, /)
-	ADD_OPERATE(Real, /)
+	DEFAULT_PRIORITY(/)
 
 	throw type_error();
 }
@@ -636,8 +643,13 @@ value value::Mod(const value &rhs) const
 		return reinterpret_cast<value *>(m_val)->Mod(rhs);
 	}
 
-	ADD_OPERATE(Boolean, %)
-	ADD_OPERATE(Integer, %)
+	if (isInteger())
+	{
+		return value(toInteger() % rhs.toInteger());
+	} else if (isBoolean())
+	{
+		return value(toBoolean() % rhs.toBoolean());
+	}
 
 	throw type_error();
 }
