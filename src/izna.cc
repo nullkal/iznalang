@@ -242,8 +242,19 @@ value eval_tree(std::shared_ptr<node> node)
 
 				if (arr.size() <= rv_int)
 				{
+					while (arr.capacity() <= rv_int)
+					{
+						if (arr.capacity() == 0)
+						{
+							arr.reserve(1);
+						} else
+						{
+							arr.reserve(arr.capacity() * 2);
+						}
+					}
 					arr.resize(rv_int + 1);
 				}
+
 				return value(&arr[rv_int]);
 			}
 			else if (lv.isObject())
