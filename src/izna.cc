@@ -6,6 +6,8 @@
 #include <memory>
 #include <random>
 #include <cmath>
+#include <boost/pool/pool.hpp>
+#include <boost/pool/object_pool.hpp>
 
 #include <GL/glew.h>
 #include <GL/glut.h>
@@ -295,6 +297,24 @@ void Draw();
 std::vector<stg::Texture_ptr> g_textures;
 izna::value g_drawfunc;
 
+struct Bullet
+{
+	Bullet *next;
+
+	int count;
+
+	double x;
+	double y;
+
+	double speed;
+	double direction;
+
+	izna::value func;
+};
+boost::object_pool<Bullet> g_bulletPool;
+
+Bullet *g_bulletHead;
+
 stg::input::Key GetKey(std::string str)
 {
 	if (str == "ESC")
@@ -432,6 +452,60 @@ int main(int argc, char *argv[])
 				})
 			);
 
+		izna::cur_scope->setValue(
+			"PutBullet",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					Bullet *new_bullet = g_bulletPool.construct();
+					new_bullet->count = 0;
+					new_bullet->x     = args[0].toReal();
+					new_bullet->y     = args[1].toReal();
+					new_bullet->speed = args[2].toReal();
+					new_bullet->direction = args[3].toReal();
+					new_bullet->func = args[4];
+
+					new_bullet->next = g_bulletHead;
+					g_bulletHead = new_bullet;
+
+					return izna::value();
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"DrawBullet",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					auto prev_ip = &g_bulletHead;
+					for (auto it = g_bulletHead; it != nullptr;)
+					{
+						izna::value bullet_param({
+								{"count", izna::value(it->count)},
+								{"x", izna::value(it->x)},
+								{"y", izna::value(it->y)},
+								{"speed", izna::value(it->speed)},
+								{"direction", izna::value(it->direction)},
+								{"func", it->func}
+							});
+						if (ExecFunc(it->func, {izna::value(&bullet_param)}).toBoolean())
+						{
+							auto raw_bp = bullet_param.toUnorderedMap();
+							++it->count;
+							it->speed = raw_bp["speed"].toReal();
+							it->direction = raw_bp["direction"].toReal();
+							it->x = raw_bp["x"].toReal() + it->speed * cos(it->direction);
+							it->y = raw_bp["y"].toReal() + it->speed * sin(it->direction);
+							it->func = raw_bp["func"];
+
+							prev_ip = &(it->next);
+							it = it->next;
+						} else
+						{
+							auto old_it = it;
+							it = it->next;
+							*prev_ip = it;
+							g_bulletPool.destroy(old_it);
+						}
+					}
+				})
+			);
 
 		izna::cur_scope->setValue(
 			"sin",
