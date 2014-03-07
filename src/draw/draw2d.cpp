@@ -86,11 +86,12 @@ Drawer2D Drawer2D::Apply() const
 	}
 
 	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+
 	glBindTexture(GL_TEXTURE_2D, m_tex->GetHandle());
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	glEnable(GL_BLEND);
 	switch (m_blendmode)
 	{
 	case BlendMode::NORMAL:
@@ -109,22 +110,31 @@ Drawer2D Drawer2D::Apply() const
 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	glBegin(GL_TRIANGLE_STRIP);
-		glColor4ub(m_color_r, m_color_g, m_color_b, m_color_a);
+	GLint vertex[4][2] = {
+		{0                , 0                 },
+		{0                , m_tex->GetHeight()},
+		{m_tex->GetWidth(), 0                 },
+		{m_tex->GetWidth(), m_tex->GetHeight()}
+	};
 
-		glTexCoord2d(tex_coord_left, tex_coord_top);
-		glVertex2d(0, 0);
+	GLdouble texc[4][2] = {
+		{tex_coord_left , tex_coord_top   },
+		{tex_coord_left , tex_coord_bottom},
+		{tex_coord_right, tex_coord_top   },
+		{tex_coord_right, tex_coord_bottom}
+	};
 
-		glTexCoord2d(tex_coord_left, tex_coord_bottom);
-		glVertex2d(0, m_tex->GetHeight());
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-		glTexCoord2d(tex_coord_right, tex_coord_top);
-		glVertex2d(m_tex->GetWidth(), 0);
+	glVertexPointer(2, GL_INT, 0, vertex);
+	glTexCoordPointer(2, GL_DOUBLE, 0, texc);
 
-		glTexCoord2d(tex_coord_right, tex_coord_bottom);
-		glVertex2d(m_tex->GetWidth(), m_tex->GetHeight());
-	glEnd();
-	glFlush();
+	glColor4ub(m_color_r, m_color_g, m_color_b, m_color_a);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	if (m_circle_gauge_enabled)
 	{

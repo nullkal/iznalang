@@ -504,6 +504,7 @@ int main(int argc, char *argv[])
 							g_bulletPool.destroy(old_it);
 						}
 					}
+					return izna::value();
 				})
 			);
 
