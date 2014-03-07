@@ -571,17 +571,76 @@ parser::token_type yylex(
 				break;
 			} else if ((c = chk.ReadIfInputIs('\\')))
 			{
-				switch (*chk.Read())
+				if (chk.ReadIfInputIsIn('0','7', false))
 				{
-				case 'n':
-					buf.append(1, '\n');
-					break;
-				case '"':
-					buf.append(1, '"');
-					break;
-				default:
-					// TODO: dispatch an error, or at least notify a warning
-					break;
+					char c_code = 0;
+					for (int i = 0; i < 3 && (c = chk.ReadIfInputIsIn('0', '7')); ++i)
+					{
+						c_code = c_code * 8 + (*c - '0');
+					}
+
+					buf.append(1, c_code);
+				}
+				else if (chk.ReadIfInputIs('x') || chk.ReadIfInputIs('X'))
+				{
+					char c_code = 0;
+					for (int i = 0; i < 2; ++i)
+					{
+						if (
+							!(c = chk.ReadIfInputIsIn('0', '9')) &&
+							!(c = chk.ReadIfInputIsIn('a', 'f')) &&
+							!(c = chk.ReadIfInputIsIn('A', 'F')))
+						{
+							break;
+						}
+
+						c_code *= 16;
+						if ('0' <= c && c <= '9')
+						{
+							c_code += *c - '0';
+						}
+						else if ('a' <= c && c <= 'f')
+						{
+							c_code += 10 + *c - 'a';
+						}
+						else if ('A' <= c && c <= 'F')
+						{
+							c_code += 10 + *c - 'A';
+						}
+					}
+					buf.append(1, c_code);
+				} else
+				{
+					switch (*chk.Read())
+					{
+					case 'a':
+						buf.append(1, '\a');
+						break;
+					case 'b':
+						buf.append(1, '\b');
+						break;
+					case 'f':
+						buf.append(1, '\f');
+						break;
+					case 'n':
+						buf.append(1, '\n');
+						break;
+					case 'r':
+						buf.append(1, '\r');
+						break;
+					case 't':
+						buf.append(1, '\t');
+						break;
+					case 'v':
+						buf.append(1, '\v');
+						break;
+					case '"':
+						buf.append(1, '"');
+						break;
+					default:
+						// TODO: dispatch an error, or at least notify a warning
+						break;
+					}
 				}
 			} else if ((c = chk.ReadIfInputIs('\n')))
 			{
