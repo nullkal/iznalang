@@ -432,7 +432,6 @@ int main(int argc, char *argv[])
 				})
 			);
 
-
 		izna::cur_scope->setValue(
 			"sin",
 			izna::value([](std::vector<izna::value> args) -> izna::value {
