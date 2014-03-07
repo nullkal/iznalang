@@ -28,7 +28,7 @@ MainLoop(\() do
     PutBullet(400, 100, 4, ( sin(count / (3.14 * 30)) + 1) * 3.14 / 2, drawfunc2)
   end
 
-  DrawBullet()
+  DrawBullets()
   count += 1
 end)
 

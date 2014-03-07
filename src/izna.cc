@@ -471,7 +471,7 @@ int main(int argc, char *argv[])
 			);
 
 		izna::cur_scope->setValue(
-			"DrawBullet",
+			"DrawBullets",
 			izna::value([](std::vector<izna::value> args) -> izna::value {
 					auto prev_ip = &g_bulletHead;
 					for (auto it = g_bulletHead; it != nullptr;)
