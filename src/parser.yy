@@ -466,73 +466,110 @@ parser::token_type yylex(
 		}
 	}
 
-	if (c = chk.ReadIfInputIsIn('0', '9'))
+	if ((c = chk.ReadIfInputIsIn('0', '9')))
 	{
-		std::string buf;
-		buf.append(1, *c);
-		
-		bool appeared_point = false;
-		bool appeared_exp   = false;
-		for (;;)
+		if ((c == '0') && chk.ReadIfInputIsIn('1', '9', false))
 		{
-			if (c = chk.ReadIfInputIsIn('0', '9'))
+			int num = 0;
+			while ((c = chk.ReadIfInputIsIn('0', '7')))
 			{
-				buf.append(1, *c);
-			} else if (c = chk.ReadIfInputIs('.', false))
-			{
-				if (appeared_point || appeared_exp)
-				{
-					break;
-				}
-				appeared_point = true;
-
-				buf.append(1, *c);
-				++params.input;
-			} else if ((c = chk.ReadIfInputIs('e', false)) || (c = chk.ReadIfInputIs('E', false)))
-			{
-				if (appeared_exp)
-				{
-					break;
-				}
-				appeared_exp = true;
-
-				buf.append(1, *c);
-				++params.input;
-
-				if ((c = chk.ReadIfInputIs('+')) || (c = chk.ReadIfInputIs('-')))
-				{
-					buf.append(1, *c);
-				} else
-				{
-					// TODO: implement notifying about the erroneous notation of floating number.
-					break;
-				}
-			} else
-			{
-				break;
+				num = num * 8 + (*c - '0');
 			}
+			yylval->build<int>() = num;
+			return parser::token::INTEGER;
 		}
-
-		if (appeared_point || appeared_exp)
+		else if (c == '0' && (chk.ReadIfInputIs('x') || chk.ReadIfInputIs('X')))
 		{
-			yylval->build<double>() = boost::lexical_cast<double>(buf);
-			return parser::token::REAL;
+			int num = 0;
+			while (
+				(c = chk.ReadIfInputIsIn('0', '9')) ||
+				(c = chk.ReadIfInputIsIn('a', 'f')) ||
+				(c = chk.ReadIfInputIsIn('A', 'F')))
+			{
+				num *= 16;
+				if ('0' <= c && c <= '9')
+				{
+					num += *c - '0';
+				}
+				else if ('a' <= c && c <= 'f')
+				{
+					num += 10 + *c - 'a';
+				}
+				else if ('A' <= c && c <= 'F')
+				{
+					num += 10 + *c - 'A';
+				}
+			}
+			yylval->build<int>() = num;
+			return parser::token::INTEGER;
 		} else
 		{
-			yylval->build<int>() = boost::lexical_cast<int>(buf);
-			return parser::token::INTEGER;
+			std::string buf;
+			buf.append(1, *c);
+
+			bool appeared_point = false;
+			bool appeared_exp   = false;
+			for (;;)
+			{
+				if ((c = chk.ReadIfInputIsIn('0', '9')))
+				{
+					buf.append(1, *c);
+				} else if ((c = chk.ReadIfInputIs('.', false)))
+				{
+					if (appeared_point || appeared_exp)
+					{
+						break;
+					}
+					appeared_point = true;
+
+					buf.append(1, *c);
+					++params.input;
+				} else if ((c = chk.ReadIfInputIs('e', false)) || (c = chk.ReadIfInputIs('E', false)))
+				{
+					if (appeared_exp)
+					{
+						break;
+					}
+					appeared_exp = true;
+
+					buf.append(1, *c);
+					++params.input;
+
+					if ((c = chk.ReadIfInputIs('+')) || (c = chk.ReadIfInputIs('-')))
+					{
+						buf.append(1, *c);
+					} else
+					{
+						// TODO: implement notifying about the erroneous notation of floating number.
+						break;
+					}
+				} else
+				{
+					break;
+				}
+			}
+
+			if (appeared_point || appeared_exp)
+			{
+				yylval->build<double>() = boost::lexical_cast<double>(buf);
+				return parser::token::REAL;
+			} else
+			{
+				yylval->build<int>() = boost::lexical_cast<int>(buf);
+				return parser::token::INTEGER;
+			}
 		}
 	}
 
-	if (c = chk.ReadIfInputIs('"'))
+	if ((c = chk.ReadIfInputIs('"')))
 	{
 		std::string buf;
 		for (;;)
 		{
-			if (c = chk.ReadIfInputIs('"'))
+			if ((c = chk.ReadIfInputIs('"')))
 			{
 				break;
-			} else if (c = chk.ReadIfInputIs('\\'))
+			} else if ((c = chk.ReadIfInputIs('\\')))
 			{
 				switch (*chk.Read())
 				{
@@ -546,7 +583,7 @@ parser::token_type yylex(
 					// TODO: dispatch an error, or at least notify a warning
 					break;
 				}
-			} else if (c = chk.ReadIfInputIs('\n'))
+			} else if ((c = chk.ReadIfInputIs('\n')))
 			{
 				// TODO: dispatch an error
 				break;
@@ -687,7 +724,7 @@ parser::token_type yylex(
 		return parser::token::IDENTIFIER;
 	}
 
-	if (c = chk.Read())
+	if ((c = chk.Read()))
 	{
 		return parser::token_type(*c);
 	}
