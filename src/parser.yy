@@ -204,7 +204,7 @@ expr : expr '+' opt_newlines expr         { $$ = std::make_shared<node>(OP_ADD  
 			$$ = std::make_shared<node>(
 				OP_ASSIGN,
 				$1,
-				std::make_shared<node>(OP_MULTIPLY, $4));
+				std::make_shared<node>(OP_MULTIPLY, $1, $4));
 		}
 	 | expr SLASH_EQ opt_newlines expr {
 			$$ = std::make_shared<node>(
@@ -466,13 +466,7 @@ parser::token_type yylex(
 		}
 	}
 
-	if (chk.ReadIfInputIs('0') && !chk.ReadIfInputIsIn('0', '9', false))
-	{
-		yylval->build<int>() = 0;
-		return parser::token::INTEGER;
-	}
-
-	if (c = chk.ReadIfInputIsIn('1', '9'))
+	if (c = chk.ReadIfInputIsIn('0', '9'))
 	{
 		std::string buf;
 		buf.append(1, *c);

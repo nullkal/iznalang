@@ -555,7 +555,10 @@ int main(int argc, char *argv[])
 
 		izna::eval_tree(params.root);
 
-		glutMainLoop();
+		if (!g_drawfunc.isNil())
+		{
+			glutMainLoop();
+		}
 		izna::popScope();
 	}
 
