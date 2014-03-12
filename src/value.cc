@@ -305,6 +305,11 @@ int value::toInteger() const
 		return reinterpret_cast<value *>(m_val)->toInteger();
 	}
 
+	if (isNil())
+	{
+		return 0;
+	}
+
 	if (isInteger())
 	{
 		return m_val;
@@ -323,6 +328,11 @@ double value::toReal() const
 	if (isRef())
 	{
 		return reinterpret_cast<value *>(m_val)->toReal();
+	}
+
+	if (isNil())
+	{
+		return 0.0;
 	}
 
 	if (isInteger())
