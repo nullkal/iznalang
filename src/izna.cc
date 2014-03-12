@@ -432,7 +432,6 @@ int main(int argc, char *argv[])
 				})
 			);
 
-
 		izna::cur_scope->setValue(
 			"sin",
 			izna::value([](std::vector<izna::value> args) -> izna::value {
@@ -481,7 +480,10 @@ int main(int argc, char *argv[])
 
 		izna::eval_tree(params.root);
 
-		glutMainLoop();
+		if (!g_drawfunc.isNil())
+		{
+			glutMainLoop();
+		}
 		izna::popScope();
 	}
 
