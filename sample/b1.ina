@@ -1,9 +1,9 @@
-bullet  = LoadPNG("bullet.png")
-bullet2 = LoadPNG("bullet2.png")
+var bullet  = LoadPNG("bullet.png")
+var bullet2 = LoadPNG("bullet2.png")
 
-PI = 3.141592653589
+var PI = 3.141592653589
 
-drawfunc = \(info) do
+var drawfunc = \(info) do
   Draw(bullet, info["x"], info["y"])
   if info["count"] <= 25
     info["speed"] -= 0.1
@@ -14,13 +14,13 @@ drawfunc = \(info) do
   -24 <= info["x"] && info["x"] <= 800 && -24 <= info["y"] && info["y"] <= 600
 end
 
-drawfunc2 = \(info) do
+var drawfunc2 = \(info) do
   Draw(bullet2, info["x"], info["y"])
   
   -24 <= info["x"] && info["x"] <= 800 && -24 <= info["y"] && info["y"] <= 600
 end
 
-count = 0
+var count = 0
 MainLoop(\() do
   if count % 1 == 0
     PutBullet(400, 100, 4, (count / 60.0 * 64.5 + 1) * PI, drawfunc)
