@@ -34,26 +34,9 @@ struct scope {
 		}
 	}
 
-	bool setValue(const std::string &name, const value &v, bool add_if_missing = true)
+	void setValue(const std::string &name, const value &v)
 	{
-		if (m_prev && m_prev->setValue(name, v, false))
-		{
-			return true;
-		}
-
-		auto var = m_var_table.find(name);
-		if (var != m_var_table.end())
-		{
-			var->second = v;
-			return true;
-		} else if (add_if_missing)
-		{
-			m_var_table[name] = v;
-			return true;
-		} else
-		{
-			return false;
-		}
+		m_var_table[name] = v;
 	}
 };
 

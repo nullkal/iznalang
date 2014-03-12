@@ -1,5 +1,5 @@
-a = 13
-b = 5
+var a = 13
+var b = 5
 
 print("a = " + a + ", b = " + b + " \n")
 print("----\n")

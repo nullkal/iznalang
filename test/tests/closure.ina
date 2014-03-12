@@ -1,14 +1,14 @@
-closure = \(modulo) do
-  count = 0
+var closure = \(modulo) do
+  var count = 0
   \() do
     count = (count + 1) % modulo
   end
 end
 
-func1 = closure(5)
-func2 = closure(7)
+var func1 = closure(5)
+var func2 = closure(7)
 
-i = 0
+var i = 0
 while i < 30
   print(func1() + ", " + func2() + "\n")
   i += 1

@@ -8,6 +8,9 @@ namespace izna {
 class type_error: std::exception
 {};
 
+class unknown_identifier_error: std::exception
+{};
+
 } //izna
 
 #endif

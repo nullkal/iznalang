@@ -99,6 +99,8 @@ parser::token_type yylex(
 %token               NEXT         "next"
 %token               BREAK        "break"
 
+%token               VAR          "var"
+
 
 %type  <std::shared_ptr<node>>  compstmt
 %type  <std::shared_ptr<node>>  stmt
@@ -116,6 +118,8 @@ parser::token_type yylex(
 %type  <std::shared_ptr<node>>  break_stmt
 
 %type  <std::shared_ptr<node>>  do_stmt
+
+%type  <std::shared_ptr<node>>  var_stmt
 
 %type  <std::shared_ptr<node>>  opt_args
 %type  <std::shared_ptr<node>>  args
@@ -172,6 +176,7 @@ stmt: expr       { $$ = $1; }
 	| while_stmt { $$ = $1; }
 	| next_stmt  { $$ = $1; }
 	| break_stmt { $$ = $1; }
+	| var_stmt   { $$ = $1; }
 	;
 
 expr : expr '+' opt_newlines expr         { $$ = std::make_shared<node>(OP_ADD        , $1, $4); }
@@ -308,6 +313,9 @@ next_stmt: NEXT { $$ = std::make_shared<node>(OP_NEXT); }
 
 break_stmt: BREAK { $$ = std::make_shared<node>(OP_BREAK); }
 		  ;
+
+var_stmt: VAR "identifier"                       { $$ = std::make_shared<node>(OP_VAR, $2, nullptr); }
+		| VAR "identifier" '=' opt_newlines expr { $$ = std::make_shared<node>(OP_VAR, $2, $5); }
 
 opt_params:        { $$ = nullptr; }
 		  | params { $$ = $1; }
@@ -770,6 +778,11 @@ parser::token_type yylex(
 	if (chk.DiscardIfInputIs("break"))
 	{
 		return parser::token::BREAK;
+	}
+
+	if (chk.DiscardIfInputIs("var"))
+	{
+		return parser::token::VAR;
 	}
 
 	if ((c = chk.ReadIfInputSatisfies(isalpha)) || (c = chk.ReadIfInputIs('_')))
