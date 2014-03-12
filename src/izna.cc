@@ -47,7 +47,7 @@ value ExecFunc(value func_val, std::vector<value> &&args)
 		auto &f = func_val.toFunc();
 
 		auto previous_scope = cur_scope;
-		cur_scope = f.scope;
+		cur_scope = f.closure_scope;
 		pushScope();
 		{
 			auto cur_param = f.params;
@@ -146,7 +146,7 @@ value eval_tree(std::shared_ptr<node> node)
 	case OP_CLOSURE:
 		{
 			auto &func = node->m_value->toFunc();
-			func.scope = cur_scope;
+			func.closure_scope = cur_scope;
 
 			return *(node->m_value);
 		}
