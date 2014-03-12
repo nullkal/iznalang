@@ -431,10 +431,23 @@ int main(int argc, char *argv[])
 		izna::cur_scope->setValue(
 			"Draw",
 			izna::value([](std::vector<izna::value> args) -> izna::value {
+					std::unordered_map<std::string, izna::value> options;
+					if (args.size() >= 4 && args[3].isObject())
+					{
+						options = args[3].toObject();
+					}
+
 					stg::Drawer2D(
 						g_textures[args[0].toInteger()],
 						args[1].toInteger(),
-						args[2].toInteger()).Apply();
+						args[2].toInteger())
+					.SetOrigin(options["origin_x"].toReal(), options["origin_y"].toReal())
+					.Rotate(options["rotate"].toReal())
+					.SetFlipX(options["flip_x"].toBoolean())
+					.SetFlipY(options["flip_y"].toBoolean())
+					.SetScale(options["scale_x"].toBoolean(), options["scale_y"].toBoolean())
+					.Apply();
+
 					return izna::value();
 				})
 			);
