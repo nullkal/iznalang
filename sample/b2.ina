@@ -5,7 +5,13 @@ var arrow   = LoadPNG("arrow.png")
 var PI = 3.141592653589
 
 var drawfunc = \(info) do
-  Draw(arrow, info["x"], info["y"], {"rotate": -info["direction"] * 180 / PI})
+  Draw(
+    arrow,
+    info["x"], info["y"],
+    {
+      "rotate": -info["direction"] * 180 / PI,
+      "origin_x": 7, "origin_y": 12
+    })
   if info["count"] <= 25
     info["speed"] -= 0.1
   elsif info["count"] < 60
