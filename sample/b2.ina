@@ -1,10 +1,11 @@
 var bullet  = LoadPNG("bullet.png")
 var bullet2 = LoadPNG("bullet2.png")
+var arrow   = LoadPNG("arrow.png")
 
 var PI = 3.141592653589
 
 var drawfunc = \(info) do
-  Draw(bullet, info["x"], info["y"])
+  Draw(arrow, info["x"], info["y"], {"rotate": -info["direction"] * 180 / PI})
   if info["count"] <= 25
     info["speed"] -= 0.1
   elsif info["count"] < 60
