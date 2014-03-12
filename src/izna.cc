@@ -135,12 +135,15 @@ value eval_tree(std::shared_ptr<node> node)
 			auto v = cur_scope->getValue(node->m_string);
 			if (!v)
 			{
-				cur_scope->setValue(node->m_string, value());
-				v = cur_scope->getValue(node->m_string);
+				throw unknown_identifier_error();
 			}
 
 			return value(v);
 		}
+
+	case OP_VAR:
+		cur_scope->setValue(node->m_string, eval_tree(node->m_right));
+		return value(cur_scope->getValue(node->m_string));
 
 	case OP_CONST:
 		return *(node->m_value);
