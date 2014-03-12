@@ -6,6 +6,7 @@
 #include <memory>
 #include <random>
 #include <cmath>
+#include <unistd.h>
 
 #include <GL/glew.h>
 #include <GL/glut.h>
@@ -195,8 +196,6 @@ value eval_tree(std::shared_ptr<node> node)
 		}
 	case OP_EXECFUNC:
 		{
-			pushScope();
-
 			std::vector<value> args;
 			auto cur_arg = node->m_right;
 			while (cur_arg != nullptr)
@@ -205,10 +204,7 @@ value eval_tree(std::shared_ptr<node> node)
 				cur_arg = cur_arg->m_right;
 			}
 
-			value result = ExecFunc(eval_tree(node->m_left), std::move(args));
-
-			popScope();
-			return result;
+			return ExecFunc(eval_tree(node->m_left), std::move(args));
 		}
 	case OP_ARRAY:
 		{
@@ -364,6 +360,14 @@ int main(int argc, char *argv[])
 		}
 
 		izna::pushScope();
+
+		izna::cur_scope->setValue(
+			"sleep",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					usleep(args[0].toInteger());
+					return izna::value();
+				})
+			);
 
 		izna::cur_scope->setValue(
 			"print",
