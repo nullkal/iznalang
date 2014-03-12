@@ -112,7 +112,7 @@ struct func
 	std::shared_ptr<node> params;
 	std::shared_ptr<node> stmt;
 
-	std::shared_ptr<scope> scope;
+	std::shared_ptr<scope> closure_scope;
 
 	explicit func():
 		params(),

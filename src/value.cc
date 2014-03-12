@@ -87,6 +87,14 @@ value::value(const value &v):
 		{
 			auto val = reinterpret_cast<func *>(v.m_val);
 			m_val = reinterpret_cast<intptr_t>(new func(*val));
+		} else if (v.isArray())
+		{
+			auto val = reinterpret_cast<std::vector<value> *>(v.m_val);
+			m_val = reinterpret_cast<intptr_t>(new std::vector<value>(*val));
+		} else if (v.isObject())
+		{
+			auto val = reinterpret_cast<std::unordered_map<std::string, value> *>(v.m_val);
+			m_val = reinterpret_cast<intptr_t>(new std::unordered_map<std::string, value>(*val));
 		}
 	}
 
@@ -137,6 +145,16 @@ value::~value()
 		if (isFunc())
 		{
 			delete reinterpret_cast<func *>(m_val);
+		}
+
+		if (isArray())
+		{
+			delete reinterpret_cast<std::vector<value> *>(m_val);
+		}
+
+		if (isObject())
+		{
+			delete reinterpret_cast<std::unordered_map<std::string, value> *>(m_val);
 		}
 	}
 }

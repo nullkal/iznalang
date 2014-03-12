@@ -49,7 +49,7 @@ value ExecFunc(value func_val, std::vector<value> &&args)
 		auto &f = func_val.toFunc();
 
 		auto previous_scope = cur_scope;
-		cur_scope = f.scope;
+		cur_scope = f.closure_scope;
 		pushScope();
 		{
 			auto cur_param = f.params;
@@ -148,7 +148,7 @@ value eval_tree(std::shared_ptr<node> node)
 	case OP_CLOSURE:
 		{
 			auto &func = node->m_value->toFunc();
-			func.scope = cur_scope;
+			func.closure_scope = cur_scope;
 
 			return *(node->m_value);
 		}
@@ -197,8 +197,6 @@ value eval_tree(std::shared_ptr<node> node)
 		}
 	case OP_EXECFUNC:
 		{
-			pushScope();
-
 			std::vector<value> args;
 			auto cur_arg = node->m_right;
 			while (cur_arg != nullptr)
@@ -207,10 +205,7 @@ value eval_tree(std::shared_ptr<node> node)
 				cur_arg = cur_arg->m_right;
 			}
 
-			value result = ExecFunc(eval_tree(node->m_left), std::move(args));
-
-			popScope();
-			return result;
+			return ExecFunc(eval_tree(node->m_left), std::move(args));
 		}
 	case OP_ARRAY:
 		{
@@ -384,6 +379,14 @@ int main(int argc, char *argv[])
 		}
 
 		izna::pushScope();
+
+		izna::cur_scope->setValue(
+			"sleep",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					usleep(args[0].toInteger());
+					return izna::value();
+				})
+			);
 
 		izna::cur_scope->setValue(
 			"print",
