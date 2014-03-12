@@ -434,7 +434,7 @@ int main(int argc, char *argv[])
 					std::unordered_map<std::string, izna::value> options;
 					if (args.size() >= 4 && args[3].isObject())
 					{
-						options = args[3].toObject();
+						options = args[3].toUnorderedMap();
 					}
 
 					stg::Drawer2D(
@@ -445,7 +445,9 @@ int main(int argc, char *argv[])
 					.Rotate(options["rotate"].toReal())
 					.SetFlipX(options["flip_x"].toBoolean())
 					.SetFlipY(options["flip_y"].toBoolean())
-					.SetScale(options["scale_x"].toBoolean(), options["scale_y"].toBoolean())
+					.SetScale(
+						options["scale_x"].toBoolean() ? options["scale_x"].toReal() : 1,
+						options["scale_y"].toBoolean() ? options["scale_y"].toReal() : 1)
 					.Apply();
 
 					return izna::value();
