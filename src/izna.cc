@@ -547,19 +547,13 @@ int main(int argc, char *argv[])
 						if (ExecFunc(it->func, {izna::value(&bullet_param)}).toBoolean())
 						{
 							auto raw_bp = bullet_param.toUnorderedMap();
+							++it->count;
 							it->speed = raw_bp["speed"].toReal();
 							it->direction = raw_bp["direction"].toReal();
 							it->x = raw_bp["x"].toReal() + it->speed * cos(it->direction);
 							it->y = raw_bp["y"].toReal() + it->speed * sin(it->direction);
 							it->func = raw_bp["func"];
 
-							if (raw_bp["count"].toInteger() == it->count)
-							{
-								++it->count;
-							} else
-							{
-								it->count = raw_bp["count"].toInteger();
-							}
 
 							prev_ip = &(it->next);
 							it = it->next;

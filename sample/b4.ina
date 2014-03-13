@@ -1,0 +1,60 @@
+var bullets  = SplitTexture(LoadPNG("bullets.png"), 16, 16, 32, 32)
+var PI = 3.141592653589
+
+var draw_funcs = []
+var phase_bn   = [9, 0, 1, 5]
+
+var i = 0
+while i < 4
+  draw_funcs[] = \(phase) do
+    \(info) do
+      Draw(
+        bullets[16 * 1 + phase_bn[phase]],
+        info["x"], info["y"],
+        {
+          "rotate": -info["direction"] * 180 / PI,
+          "origin_x": 16, "origin_y": 16
+        })
+
+      if phase < ArraySize(draw_funcs) - 1 && info["count"] == 45
+        var i = 0
+        while i < 3
+          PutBullet(
+            info["x"], info["y"],
+            4,
+            info["direction"] + PI + (PI / 16) * (i - 1),
+            draw_funcs[phase + 1])
+          i += 1
+        end
+
+        i = 0
+        while i < 2
+          PutBullet(
+            info["x"], info["y"],
+            6,
+            info["direction"] + PI + (PI / 4) * (i * 1.0 - 0.5),
+            draw_funcs[phase + 1])
+          i += 1
+        end
+      end
+
+      info["count"] <= 45 || ArraySize(draw_funcs) - 1 <= phase
+    end
+  end(i + 0)
+  i += 1
+end
+
+var count = 0
+MainLoop(\() do
+  if count == 0
+    var i = 0
+    while i < 8
+      PutBullet(400 + cos(PI * i / 4.0) * 80, 100 + sin(PI * i / 4.0) * 80, 4, PI * (i + 2) / 4.0, draw_funcs[0])
+      i += 1
+    end
+  end
+
+  DrawBullets()
+  count += 1
+end)
+

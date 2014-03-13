@@ -9,17 +9,24 @@ var drawfunc = \(info) do
       "rotate": -info["direction"] * 180 / PI,
       "origin_x": 16, "origin_y": 16
     })
+
   if info["count"] <= 25
     info["speed"] -= 0.1
   elsif info["count"] < 60
     info["speed"] *= 1.06
   end
   
-  -24 <= info["x"] && info["x"] <= 800 && -24 <= info["y"] && info["y"] <= 600
+  -24 <= info["x"] && info["x"] <= 824 && -24 <= info["y"] && info["y"] <= 624
 end
 
 var drawfunc2 = \(info) do
-  Draw(bullets[16 * 0 + 9], info["x"], info["y"])
+  Draw(
+    bullets[16 * 0 + 9],
+    info["x"], info["y"],
+    {
+      "rotate": -info["direction"] * 180 / PI,
+      "origin_x": 16, "origin_y": 16
+    })
   
   -24 <= info["x"] && info["x"] <= 800 && -24 <= info["y"] && info["y"] <= 600
 end
