@@ -1,16 +1,13 @@
-var bullet  = LoadPNG("bullet.png")
-var bullet2 = LoadPNG("bullet2.png")
-var arrow   = LoadPNG("arrow.png")
-
+var bullets  = SplitTexture(LoadPNG("bullets.png"), 16, 16, 32, 32)
 var PI = 3.141592653589
 
 var drawfunc = \(info) do
   Draw(
-    arrow,
+    bullets[16 * 1 + 1],
     info["x"], info["y"],
     {
       "rotate": -info["direction"] * 180 / PI,
-      "origin_x": 7, "origin_y": 12
+      "origin_x": 16, "origin_y": 16
     })
   if info["count"] <= 25
     info["speed"] -= 0.1
@@ -22,7 +19,7 @@ var drawfunc = \(info) do
 end
 
 var drawfunc2 = \(info) do
-  Draw(bullet2, info["x"], info["y"])
+  Draw(bullets[16 * 0 + 9], info["x"], info["y"])
   
   -24 <= info["x"] && info["x"] <= 800 && -24 <= info["y"] && info["y"] <= 600
 end

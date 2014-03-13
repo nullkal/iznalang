@@ -313,6 +313,10 @@ boost::object_pool<Bullet> g_bulletPool;
 
 Bullet *g_bulletHead;
 
+stg::Texture_ptr player;
+double player_x = 400;
+double player_y = 500;
+
 stg::input::Key GetKey(std::string str)
 {
 	if (str == "ESC")
@@ -404,6 +408,41 @@ int main(int argc, char *argv[])
 			izna::value([](std::vector<izna::value> args) -> izna::value {
 					g_textures.push_back(stg::LoadPNG(args[0].toString().c_str()));
 					return izna::value(static_cast<int>(g_textures.size() - 1));
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"SplitTexture",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					std::vector<stg::Texture_ptr> splitted_textures;
+					if (args.size() >= 5)
+					{
+						splitted_textures = stg::SplitTexture(
+							g_textures[args[0].toInteger()],
+							args[1].toInteger(),
+							args[2].toInteger(),
+							args[3].toInteger(),
+							args[4].toInteger());
+					} else
+					{
+						splitted_textures = stg::SplitTexture(
+							g_textures[args[0].toInteger()],
+							args[1].toInteger(),
+							args[2].toInteger());
+					}
+
+					int head_index = g_textures.size();
+					g_textures.insert(
+						g_textures.end(),
+						splitted_textures.begin(),
+						splitted_textures.end());
+
+					std::vector<izna::value> retval;
+					for (int i = 0; i < splitted_textures.size(); ++i)
+					{
+						retval.push_back(izna::value(i + head_index));
+					}
+					return izna::value(std::move(retval));
 				})
 			);
 
@@ -508,12 +547,19 @@ int main(int argc, char *argv[])
 						if (ExecFunc(it->func, {izna::value(&bullet_param)}).toBoolean())
 						{
 							auto raw_bp = bullet_param.toUnorderedMap();
-							++it->count;
 							it->speed = raw_bp["speed"].toReal();
 							it->direction = raw_bp["direction"].toReal();
 							it->x = raw_bp["x"].toReal() + it->speed * cos(it->direction);
 							it->y = raw_bp["y"].toReal() + it->speed * sin(it->direction);
 							it->func = raw_bp["func"];
+
+							if (raw_bp["count"].toInteger() == it->count)
+							{
+								++it->count;
+							} else
+							{
+								it->count = raw_bp["count"].toInteger();
+							}
 
 							prev_ip = &(it->next);
 							it = it->next;
@@ -551,12 +597,27 @@ int main(int argc, char *argv[])
 			);
 
 		izna::cur_scope->setValue(
+			"atan2",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					return izna::value(std::atan2(args[0].toReal(), args[1].toReal()));
+				})
+			);
+
+
+		izna::cur_scope->setValue(
 			"rand",
 			izna::value([](std::vector<izna::value> args) -> izna::value {
 					static std::mt19937 mt;
 
 					std::uniform_real_distribution<double> rand_range(0.0, 1.0);
 					return izna::value(rand_range(mt));
+				})
+			);
+
+		izna::cur_scope->setValue(
+			"floor",
+			izna::value([](std::vector<izna::value> args) -> izna::value {
+					return izna::value(floor(args[0].toReal()));
 				})
 			);
 
@@ -604,6 +665,8 @@ void Timer(int)
 
 bool InitResources()
 {
+	player = stg::LoadPNG("player.png");
+
 	return true;
 }
 
@@ -612,7 +675,49 @@ void Draw()
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	{
+		double player_dx = 0;
+		double player_dy = 0;
+		if (stg::input::Key::Up().IsHolded())
+		{
+			player_dy -= 1;
+		}
+		if (stg::input::Key::Down().IsHolded())
+		{
+			player_dy += 1;
+		}
+		if (stg::input::Key::Left().IsHolded())
+		{
+			player_dx -= 1;
+		}
+		if (stg::input::Key::Right().IsHolded())
+		{
+			player_dx += 1;
+		}
+
+		const double player_speed = stg::input::Key('z').IsHolded()? 4 : 8;
+		const double norm = sqrt(player_dx * player_dx + player_dy * player_dy);
+		if (norm != 0)
+		{
+			player_dx *= player_speed / norm;
+			player_dy *= player_speed / norm;
+		}
+
+		player_x += player_dx;
+		player_y += player_dy;
+	}
+
 	stg::Draw2D([](){
+		if (player)
+		{
+		stg::Drawer2D(player, player_x, player_y)
+				.SetOrigin(24, 24)
+				.Apply();
+		}
+
+		izna::cur_scope->setValue("player_x", izna::value(player_x));
+		izna::cur_scope->setValue("player_y", izna::value(player_y));
+
 		ExecFunc(g_drawfunc, std::vector<izna::value>());
 	});
 

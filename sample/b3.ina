@@ -1,0 +1,93 @@
+var bullets  = SplitTexture(LoadPNG("bullets.png"), 16, 16, 32, 32)
+var PI = 3.141592653589
+
+var IceballChunk = \() do
+  var draw_iceball = []
+  var iceball_stat = 0
+
+  var i = 0
+  while i < 12
+    draw_iceball[] = \(bullet) do
+      \(info) do
+        var bullet2draw;
+        if iceball_stat == 0
+          bullet2draw = bullet
+        else
+          bullet2draw = bullets[16 * 0 + 0]
+        end
+
+        Draw(
+          bullet2draw,
+          info["x"], info["y"],
+          {
+            "origin_x": 16, "origin_y": 16
+          })
+
+        if iceball_stat == 1
+          info["speed"] = 0
+          info["direction"] = 2 * PI * rand()
+        elsif iceball_stat == 2 && info["speed"] < 4
+          info["speed"] += 0.0625
+        end
+
+        -24 <= info["x"] && info["x"] <= 824 && -24 <= info["y"] && info["y"] <= 624
+        end
+      end(bullets[16 * 0 + (i + 1)])
+      i += 1
+    end
+
+  {
+    "put": \() do
+        PutBullet(400, 100, 4 + 4 * rand(), 2 * PI * rand(), draw_iceball[floor(12 * rand())])
+      end,
+
+    "freeze": \() do
+        iceball_stat = 1
+      end,
+
+    "resume": \() do
+         iceball_stat = 2
+      end
+  }
+end
+
+var draw_5way = \(info) do
+  Draw(bullets[16 * 0 + 9],
+    info["x"], info["y"],
+    {
+      "origin_x": 16, "origin_y": 16
+    })
+
+    info["speed"] *= 0.9999
+
+    -24 <= info["x"] && info["x"] <= 824 && -24 <= info["y"] && info["y"] <= 624
+end
+
+var ic
+var count = 0
+MainLoop(\() do
+  var timing = (count / 8) % 70
+  if timing == 0 && count % 8 == 0
+    ic = IceballChunk()
+  elsif timing < 29
+    ic["put"]()
+  elsif timing == 32
+    ic["freeze"]()
+  elsif 40 < timing && timing < 50 && count % 8 == 0
+    var i = 0
+    while i < 15
+      PutBullet(
+        400, 100,
+        4 +  2 * (i / 5),
+        atan2(player_y - 100, player_x - 400) + (PI / 12) * (i % 5 - 2),
+        draw_5way)
+      i += 1
+    end
+  elsif timing == 62 && count % 8 == 0
+    ic["resume"]()
+  end
+
+  DrawBullets()
+  count += 1
+end)
+
