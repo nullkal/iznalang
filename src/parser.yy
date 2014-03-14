@@ -262,7 +262,7 @@ do_stmt: DO term compstmt terms END { $$ = $3; }
 	   | stmt { $$ = $1; }
 	   ;
 
-if_stmt: IF expr term compstmt term opt_elsifs opt_else END {
+if_stmt: IF expr term compstmt terms opt_elsifs opt_else END {
 		     $$ = std::make_shared<node>(OP_IF, $4, $6, $2);
 			 if ($7)
 			 {
@@ -304,7 +304,7 @@ opt_else: { $$ = nullptr; }
 else: ELSE term compstmt terms { $$ = $3; }
 	;
 
-while_stmt: WHILE expr term compstmt term END
+while_stmt: WHILE expr term compstmt terms END
 		    { $$ = std::make_shared<node>(OP_WHILE, $4, nullptr, $2); }
 		  ;
 
