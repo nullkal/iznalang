@@ -56,7 +56,9 @@ value ExecFunc(value func_val, std::vector<value> &&args)
 			auto cur_arg   = args.begin();
 			while (cur_param != nullptr)
 			{
-				cur_scope->setValue(cur_param->m_string, cur_arg->toRef());
+				cur_scope->setValue(
+					cur_param->m_string,
+					(cur_arg->isArray() || cur_arg->isObject()) ? *cur_arg : cur_arg->toRef());
 				cur_param = cur_param->m_right;
 				++cur_arg;
 			}
