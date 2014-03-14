@@ -41,7 +41,7 @@ while i < 4
       (info["count"] <= 45 || ArraySize(draw_funcs) - 1 <= phase) && 
         -24 <= info["x"] && info["x"] <= 800 && -24 <= info["y"] && info["y"] <= 600
     end
-  end(i + 0)
+  end(i)
   i += 1
 end
 
