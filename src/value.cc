@@ -521,7 +521,10 @@ std::unordered_map<std::string, value> &value::toUnorderedMap() const
 
 value &value::toRef() const
 {
-	return *reinterpret_cast<value *>(m_val);
+	if (isRef())
+	{
+		return *reinterpret_cast<value *>(m_val);
+	}
 }
 
 #define ADD_OPERATE(type, opr) \
