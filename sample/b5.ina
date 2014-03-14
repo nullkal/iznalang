@@ -1,0 +1,142 @@
+var bullets  = SplitTexture(LoadPNG("bullets.png"), 16, 16, 32, 32)
+var PI = 3.141592653589
+
+var draw_func4 = \(bullet) do
+  \(info) do
+  Draw(
+    bullet,
+    info["x"], info["y"],
+      {
+        "rotate": -info["direction"] * 180 / PI,
+        "origin_x": 16, "origin_y": 16
+      })
+
+    -24 <= info["x"] && info["x"] <= 800 && -24 <= info["y"] && info["y"] <= 600
+  end
+end
+
+var draw_func3 = \(num) do
+  var df4_bullets = [16 * 2 + 3, 16 * 2 + 5]
+
+  \(info) do
+    Draw(
+      bullets[16 * 3 + 3],
+      info["x"], info["y"],
+      {
+        "origin_x": 16, "origin_y": 16
+      })
+
+    var retval = 1
+    if info["count"] > 180
+      retval = 0
+      PutBullet(
+        info["x"],
+        info["y"],
+        2,
+        info["direction"] + PI * (num + 0.1),
+        draw_func4(df4_bullets[num]))
+      PutBullet(
+        info["x"],
+        info["y"],
+        3,
+        info["direction"] + PI * (num + 0.1),
+        draw_func4(df4_bullets[num]))
+      PutBullet(
+        info["x"],
+        info["y"],
+        2,
+        info["direction"] + PI * (num + 0.4),
+        draw_func4(df4_bullets[num]))
+      PutBullet(
+        info["x"],
+        info["y"],
+        3,
+        info["direction"] + PI * (num + 0.4),
+        draw_func4(df4_bullets[num]))
+    end
+
+    retval == 1
+  end
+end
+
+var draw_func2 = \(num) do
+  \(info) do
+    Draw(
+      bullets[16 * 0 + 0],
+      info["x"], info["y"],
+      {
+        "origin_x": 16, "origin_y": 16
+      })
+  
+    var retval = 1
+    if info["speed"] > 0
+      info["speed"] -= 0.02
+    else
+      retval = 0
+      PutBullet(
+        info["x"],
+        info["y"],
+        0,
+        info["direction"] - PI / 2,
+        draw_func3(num))
+    end
+  
+    retval == 1
+  end
+end
+
+var draw_func1 = \(num, attenuation, vr) do
+  \(info) do
+    Draw(
+      bullets[16 * 3 + 0],
+      info["x"], info["y"],
+      {
+        "origin_x": 16, "origin_y": 16
+      })
+
+    var retval = 1
+    if info["speed"] > 0
+      info["speed"] -= attenuation
+    else
+      retval = 0
+      PutBullet(
+        info["x"],
+        info["y"],
+        1,
+        info["direction"] + vr,
+        draw_func2(num))
+    end
+
+    retval == 1
+  end
+end
+
+var count = 0
+MainLoop(\() do
+  var timing = (count / 360) % 4
+  if (timing == 0 || timing == 2) && (count % 360 < 240)
+  if count % 6 == 0
+    var i = 0
+    while i < 5
+      PutBullet(
+        400,
+        150,
+        8,
+        (PI * 2) / 5 * i - (count % 240) * (PI / 240) * (timing - 1),
+        draw_func1((count % 240 / 6) % 2, 0.16 + (count % 240) / 6000.0, -(timing - 1) * (PI / 2)))
+      PutBullet(
+        400,
+        150,
+        5,
+        (PI * 2) / 5 * i - (count % 240) * (PI / 240) * (timing - 1),
+        draw_func1((count % 240 / 6) % 2, 0.10 + (count % 240) / 6000.0, -(timing - 1) * (PI / 2)))
+
+      i += 1
+    end
+  end
+  end
+
+  DrawBullets()
+  count += 1
+end)
+
