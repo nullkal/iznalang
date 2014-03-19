@@ -15,7 +15,7 @@ var draw_func4 = \(bullet) do
   end
 end
 
-var draw_func3 = \(num) do
+var draw_func3 = \(num, num2) do
   var df4_bullets = [16 * 2 + 3, 16 * 2 + 5]
 
   \(info) do
@@ -32,34 +32,42 @@ var draw_func3 = \(num) do
       PutBullet(
         info["x"],
         info["y"],
-        2,
-        info["direction"] + PI * (num + 0.1),
-        draw_func4(df4_bullets[num]))
-      PutBullet(
-        info["x"],
-        info["y"],
         3,
-        info["direction"] + PI * (num + 0.1),
+        info["direction"] + PI * num * (1 - num * 2),
         draw_func4(df4_bullets[num]))
-      PutBullet(
-        info["x"],
-        info["y"],
-        2,
-        info["direction"] + PI * (num + 0.4),
-        draw_func4(df4_bullets[num]))
-      PutBullet(
-        info["x"],
-        info["y"],
-        3,
-        info["direction"] + PI * (num + 0.4),
-        draw_func4(df4_bullets[num]))
+
+      if num == 1
+        PutBullet(
+          info["x"],
+          info["y"],
+          3,
+          info["direction"] + PI * (num + 0.5) * (1 - num * 2),
+          draw_func4(df4_bullets[0]))
+      end
+
+      if num2 == 2
+        PutBullet(
+          info["x"],
+          info["y"],
+          2,
+          info["direction"] + PI * num * (1 - num * 2),
+          draw_func4(df4_bullets[num]))
+        if num == 1
+          PutBullet(
+            info["x"],
+            info["y"],
+            2,
+            info["direction"] + PI * (num + 0.5) * (1 - num * 2),
+            draw_func4(df4_bullets[0]))
+        end
+      end
     end
 
     retval == 1
   end
 end
 
-var draw_func2 = \(num) do
+var draw_func2 = \(num, num2) do
   \(info) do
     Draw(
       bullets[16 * 0 + 0],
@@ -78,14 +86,14 @@ var draw_func2 = \(num) do
         info["y"],
         0,
         info["direction"] - PI / 2,
-        draw_func3(num))
+        draw_func3(num, num2))
     end
   
     retval == 1
   end
 end
 
-var draw_func1 = \(num, attenuation, vr) do
+var draw_func1 = \(num, num2, attenuation, vr) do
   \(info) do
     Draw(
       bullets[16 * 3 + 0],
@@ -102,9 +110,9 @@ var draw_func1 = \(num, attenuation, vr) do
       PutBullet(
         info["x"],
         info["y"],
-        1,
+        1.5,
         info["direction"] + vr,
-        draw_func2(num))
+        draw_func2(num, num2))
     end
 
     retval == 1
@@ -123,13 +131,13 @@ MainLoop(\() do
         150,
         8,
         (PI * 2) / 5 * i - (count % 240) * (PI / 240) * (timing - 1),
-        draw_func1((count % 240 / 6) % 2, 0.16 + (count % 240) / 6000.0, -(timing - 1) * (PI / 2)))
+        draw_func1((count % 240 / 6) % 2, 2, 0.16 + (count % 240) / 6000.0, -(timing - 1) * (PI / 2)))
       PutBullet(
         400,
         150,
-        5,
+        4.5,
         (PI * 2) / 5 * i - (count % 240) * (PI / 240) * (timing - 1),
-        draw_func1((count % 240 / 6) % 2, 0.10 + (count % 240) / 6000.0, -(timing - 1) * (PI / 2)))
+        draw_func1((count % 240 / 6) % 2, 1, 0.10 + (count % 240) / 6000.0, -(timing - 1) * (PI / 2)))
 
       i += 1
     end
