@@ -452,6 +452,42 @@ public:
 		m_params.input += length;
 		return true;
 	}
+
+	bool Keyword(const char *str, size_t length = 0)
+	{
+		if (length == 0)
+		{
+			length = strlen(str);
+		}
+
+		int i = 0;
+		for (i = 0; i < length; ++i)
+		{
+			if (m_params.inputEnd <= m_params.input + i)
+			{
+				return false;
+			}
+
+			if (m_params.input[i] != str[i])
+			{
+				return false;
+			}
+		}
+
+		if (m_params.inputEnd <= m_params.input + i)
+		{
+			return false;
+		}
+
+		if (isalnum(m_params.input[i]) || m_params.input[i] == '_')
+		{
+			return false;
+		}
+
+		m_params.input += length;
+		return true;
+	}
+
 };
 
 } //izna::(anonymous)
@@ -740,47 +776,47 @@ parser::token_type yylex(
 		return parser::token::GREATER;
 	}
 
-	if (chk.DiscardIfInputIs("end"))
+	if (chk.Keyword("end"))
 	{
 	return parser::token::END;
 	}
 
-	if (chk.DiscardIfInputIs("do"))
+	if (chk.Keyword("do"))
 	{
 		return parser::token::DO;
 	}
 
-	if (chk.DiscardIfInputIs("if"))
+	if (chk.Keyword("if"))
 	{
 		return parser::token::IF;
 	}
 
-	if (chk.DiscardIfInputIs("elsif"))
+	if (chk.Keyword("elsif"))
 	{
 		return parser::token::ELSIF;
 	}
 
-	if (chk.DiscardIfInputIs("else"))
+	if (chk.Keyword("else"))
 	{
 		return parser::token::ELSE;
 	}
 
-	if (chk.DiscardIfInputIs("while"))
+	if (chk.Keyword("while"))
 	{
 		return parser::token::WHILE;
 	}
 
-	if (chk.DiscardIfInputIs("next"))
+	if (chk.Keyword("next"))
 	{
 		return parser::token::NEXT;
 	}
 
-	if (chk.DiscardIfInputIs("break"))
+	if (chk.Keyword("break"))
 	{
 		return parser::token::BREAK;
 	}
 
-	if (chk.DiscardIfInputIs("var"))
+	if (chk.Keyword("var"))
 	{
 		return parser::token::VAR;
 	}
