@@ -543,27 +543,26 @@ int main(int argc, char *argv[])
 		izna::cur_scope->setValue(
 			"DrawBullets",
 			izna::value([](std::vector<izna::value> args) -> izna::value {
+					auto bullet_param = izna::value(std::unordered_map<std::string, izna::value>());
+					auto &raw_bp = bullet_param.toUnorderedMap();
+
 					auto prev_ip = &g_bulletHead;
 					for (auto it = g_bulletHead; it != nullptr;)
 					{
-						izna::value bullet_param({
-								{"count", izna::value(it->count)},
-								{"x", izna::value(it->x)},
-								{"y", izna::value(it->y)},
-								{"speed", izna::value(it->speed)},
-								{"direction", izna::value(it->direction)},
-								{"func", it->func}
-							});
+						raw_bp["count"]     = izna::value(it->count);
+						raw_bp["x"]         = izna::value(it->x);
+						raw_bp["y"]         = izna::value(it->y);
+						raw_bp["speed"]     = izna::value(it->speed);
+						raw_bp["direction"] = izna::value(it->direction);
+						raw_bp["func"]      = izna::value(it->func);
 						if (ExecFunc(it->func, {izna::value(&bullet_param)}).toBoolean())
 						{
-							auto raw_bp = bullet_param.toUnorderedMap();
 							++it->count;
-							it->speed = raw_bp["speed"].toReal();
+							it->speed     = raw_bp["speed"].toReal();
 							it->direction = raw_bp["direction"].toReal();
-							it->x = raw_bp["x"].toReal() + it->speed * cos(it->direction);
-							it->y = raw_bp["y"].toReal() + it->speed * sin(it->direction);
-							it->func = raw_bp["func"];
-
+							it->x         = raw_bp["x"].toReal() + it->speed * cos(it->direction);
+							it->y         = raw_bp["y"].toReal() + it->speed * sin(it->direction);
+							it->func      = raw_bp["func"];
 
 							prev_ip = &(it->next);
 							it = it->next;
