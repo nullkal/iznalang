@@ -2,11 +2,18 @@
 #include <cmath>
 
 #include <algorithm>
+#include <GL/glew.h>
 #include <GL/glut.h>
 
 #include "draw2d.h"
 
 namespace stg {
+
+namespace {
+
+GLuint g_vertexBuffer;
+
+}
 
 Drawer2D Drawer2D::Apply() const
 {
@@ -18,6 +25,7 @@ Drawer2D Drawer2D::Apply() const
 	glRotated(m_rotation, 0, 0, -1);
 	glScaled(m_scale_x, m_scale_y, 1.0);
 	glTranslated(-m_origin_x, -m_origin_y, 0);
+	glScaled(m_tex->GetWidth(), m_tex->GetHeight(), 1.0);
 
 	double tex_coord_left   = m_tex->GetCoordLeft();
 	double tex_coord_right  = m_tex->GetCoordRight();
@@ -110,13 +118,6 @@ Drawer2D Drawer2D::Apply() const
 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	GLint vertex[4][2] = {
-		{0                , 0                 },
-		{0                , m_tex->GetHeight()},
-		{m_tex->GetWidth(), 0                 },
-		{m_tex->GetWidth(), m_tex->GetHeight()}
-	};
-
 	GLdouble texc[4][2] = {
 		{tex_coord_left , tex_coord_top   },
 		{tex_coord_left , tex_coord_bottom},
@@ -127,7 +128,10 @@ Drawer2D Drawer2D::Apply() const
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-	glVertexPointer(2, GL_INT, 0, vertex);
+	glBindBuffer(GL_ARRAY_BUFFER, g_vertexBuffer);
+	glVertexPointer(2, GL_INT, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glTexCoordPointer(2, GL_DOUBLE, 0, texc);
 
 	glColor4ub(m_color_r, m_color_g, m_color_b, m_color_a);
@@ -162,6 +166,20 @@ void Draw2D(std::function<void()> draw_func)
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
+}
+
+void InitDraw2D()
+{
+	glGenBuffers(1, &g_vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, g_vertexBuffer);
+
+	GLint vertices[4][2] = {
+		{0, 0},
+		{0, 1},
+		{1, 0},
+		{1, 1}
+	};
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) * sizeof(GLint), vertices, GL_STATIC_DRAW);
 }
 
 }// stg

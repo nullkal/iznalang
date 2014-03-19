@@ -59,6 +59,7 @@ public:
 };
 
 void Draw2D(std::function<void()> draw_func);
+void InitDraw2D();
 
 }// stg
 

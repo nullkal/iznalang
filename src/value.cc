@@ -320,6 +320,11 @@ int value::toInteger() const
 
 double value::toReal() const
 {
+	if (isNil())
+	{
+		return 0;
+	}
+
 	if (isRef())
 	{
 		return reinterpret_cast<value *>(m_val)->toReal();

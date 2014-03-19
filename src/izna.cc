@@ -348,7 +348,14 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	if (!GLEW_ARB_vertex_buffer_object)
+	{
+		std::cerr << "ERROR: ARB_vertex_buffer_objet is not supported in this environment" << std::endl;
+		return 1;
+	}
+
 	stg::input::Init();
+	stg::InitDraw2D();
 	if (!InitResources())
 	{
 		return 1;
