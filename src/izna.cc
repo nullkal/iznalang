@@ -502,7 +502,8 @@ int main(int argc, char *argv[])
 					std::unordered_map<std::string, izna::value> options;
 					if (args.size() >= 4 && args[3].isObject())
 					{
-						options = args[3].toUnorderedMap();
+						auto &opt_args = args[3].toUnorderedMap();
+						options.insert(opt_args.begin(), opt_args.end());
 					}
 
 					stg::Drawer2D(
