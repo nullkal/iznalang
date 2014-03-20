@@ -19,12 +19,18 @@ TextureBase::~TextureBase()
 
 RawTexture::RawTexture():
 	m_texture(0),
+	m_texcoord(0),
 	m_width(0),
 	m_height(0)
 {}
 
 RawTexture::~RawTexture()
 {
+	if (m_texcoord)
+	{
+		glDeleteBuffers(1, &m_texcoord);
+	}
+
 	if (m_texture)
 	{
 		glDeleteTextures(1, &m_texture);
@@ -34,6 +40,11 @@ RawTexture::~RawTexture()
 GLuint RawTexture::GetHandle()
 {
 	return m_texture;
+}
+
+GLuint RawTexture::GetTexCoordBuffer()
+{
+	return m_texcoord;
 }
 
 int RawTexture::GetWidth()
@@ -87,26 +98,45 @@ void RawTexture::Initialize(
 		data);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+
+	glGenBuffers(1, &m_texcoord);
+	glBindBuffer(GL_ARRAY_BUFFER, m_texcoord);
+
+	GLdouble tc[4][2] = {
+		{0.0, 0.0},
+		{0.0, 1.0},
+		{1.0, 0.0},
+		{1.0, 1.0}
+	};
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(tc) * sizeof(GLdouble), tc, GL_STATIC_DRAW);
+
+
 	m_width  = width;
 	m_height = height;
 }
 
 
-Texture::Texture():
-	m_rt(NULL),
-	m_x(0),
-	m_y(0),
-	m_width(0),
-	m_height(0)
-{}
-
 Texture::Texture(std::shared_ptr<RawTexture> rt):
 	m_rt(rt),
+	m_texcoord(0),
 	m_x(0),
 	m_y(0),
 	m_width(rt? rt->GetWidth() : 0),
 	m_height(rt? rt->GetHeight() : 0)
-{}
+{
+	glGenBuffers(1, &m_texcoord);
+	glBindBuffer(GL_ARRAY_BUFFER, m_texcoord);
+
+	GLdouble tc[4][2] = {
+		{0.0, 0.0},
+		{0.0, 1.0},
+		{1.0, 0.0},
+		{1.0, 1.0}
+	};
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(tc) * sizeof(GLdouble), tc, GL_STATIC_DRAW);
+}
 
 Texture::Texture(
 	std::shared_ptr<RawTexture> rt,
@@ -119,7 +149,19 @@ Texture::Texture(
 	m_y(y),
 	m_width(width),
 	m_height(height)
-{}
+{
+	glGenBuffers(1, &m_texcoord);
+	glBindBuffer(GL_ARRAY_BUFFER, m_texcoord);
+
+	GLdouble tc[4][2] = {
+		{GetCoordLeft() , GetCoordTop()   },
+		{GetCoordLeft() , GetCoordBottom()},
+		{GetCoordRight(), GetCoordTop()   },
+		{GetCoordRight(), GetCoordBottom()}
+	};
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(tc) * sizeof(GLdouble), tc, GL_STATIC_DRAW);
+}
 
 Texture::Texture(
 	std::shared_ptr<Texture> tex,
@@ -174,11 +216,37 @@ Texture::Texture(
 
 	m_width  = x2 - m_x;
 	m_height = y2 - m_y;
+
+
+	glGenBuffers(1, &m_texcoord);
+	glBindBuffer(GL_ARRAY_BUFFER, m_texcoord);
+
+	GLdouble tc[4][2] = {
+		{GetCoordLeft() , GetCoordTop()   },
+		{GetCoordLeft() , GetCoordBottom()},
+		{GetCoordRight(), GetCoordTop()   },
+		{GetCoordRight(), GetCoordBottom()}
+	};
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(tc) * sizeof(GLdouble), tc, GL_STATIC_DRAW);
+}
+
+Texture::~Texture()
+{
+	if (m_texcoord)
+	{
+		glDeleteBuffers(1, &m_texcoord);
+	}
 }
 
 GLuint Texture::GetHandle()
 {
 	return m_rt->GetHandle();
+}
+
+GLuint Texture::GetTexCoordBuffer()
+{
+	return m_texcoord;
 }
 
 int Texture::GetWidth()
@@ -224,31 +292,6 @@ int Texture::GetX()
 int Texture::GetY()
 {
 	return m_y;
-}
-
-void Texture::SetRawTexture(std::shared_ptr<RawTexture> rt)
-{
-	m_rt = rt;
-}
-
-void Texture::SetX(int x)
-{
-	m_x = x;
-}
-
-void Texture::SetY(int y)
-{
-	m_y = y;
-}
-
-void Texture::SetWidth(int width)
-{
-	m_width = width;
-}
-
-void Texture::SetHeight(int height)
-{
-	m_height = height;
 }
 
 

@@ -17,8 +17,8 @@ SET(SRCS
 	draw/texture.h
 	draw/texture-inl.h
 	draw/texture.cpp
-	draw/render_target.h
-	draw/render_target.cpp
+	#draw/render_target.h
+	#draw/render_target.cpp
 	draw/draw2d.h
 	draw/draw2d-inl.h
 	draw/draw2d.cpp

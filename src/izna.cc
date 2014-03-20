@@ -19,7 +19,6 @@
 
 #include "draw/input.h"
 #include "draw/texture.h"
-#include "draw/render_target.h"
 #include "draw/draw2d.h"
 
 namespace izna {

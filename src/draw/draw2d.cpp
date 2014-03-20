@@ -23,24 +23,9 @@ Drawer2D Drawer2D::Apply() const
 	glLoadIdentity();
 	glTranslated(m_position_x, m_position_y, 0);
 	glRotated(m_rotation, 0, 0, -1);
-	glScaled(m_scale_x, m_scale_y, 1.0);
+	glScaled(m_scale_x * (m_flip_x ? -1 : 1), m_scale_y * (m_flip_y ? -1 : 1), 1.0);
 	glTranslated(-m_origin_x, -m_origin_y, 0);
 	glScaled(m_tex->GetWidth(), m_tex->GetHeight(), 1.0);
-
-	double tex_coord_left   = m_tex->GetCoordLeft();
-	double tex_coord_right  = m_tex->GetCoordRight();
-	double tex_coord_top    = m_tex->GetCoordTop();
-	double tex_coord_bottom = m_tex->GetCoordBottom();
-
-	if (m_flip_x)
-	{
-		std::swap(tex_coord_left, tex_coord_right);
-	}
-	
-	if (m_flip_y)
-	{
-		std::swap(tex_coord_top , tex_coord_bottom);
-	}
 
 	if (m_circle_gauge_enabled)
 	{
@@ -118,27 +103,17 @@ Drawer2D Drawer2D::Apply() const
 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	GLdouble texc[4][2] = {
-		{tex_coord_left , tex_coord_top   },
-		{tex_coord_left , tex_coord_bottom},
-		{tex_coord_right, tex_coord_top   },
-		{tex_coord_right, tex_coord_bottom}
-	};
-
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	glBindBuffer(GL_ARRAY_BUFFER, g_vertexBuffer);
 	glVertexPointer(2, GL_INT, 0, 0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glTexCoordPointer(2, GL_DOUBLE, 0, texc);
+	glBindBuffer(GL_ARRAY_BUFFER, m_tex->GetTexCoordBuffer());
+	glTexCoordPointer(2, GL_DOUBLE, 0, 0);
 
 	glColor4ub(m_color_r, m_color_g, m_color_b, m_color_a);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	if (m_circle_gauge_enabled)
 	{
