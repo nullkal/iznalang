@@ -100,6 +100,7 @@ public:
 	value Neg() const;
 
 	value Assign(const value &rhs) const;
+	value Assign(value &&rhs) const;
 
 private:
 	value_type m_type;
