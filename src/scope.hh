@@ -38,6 +38,11 @@ struct scope {
 	{
 		m_var_table[name] = v;
 	}
+
+	void setValue(const std::string &name, value &&v)
+	{
+		m_var_table[name] = std::move(v);
+	}
 };
 
 } //izna

@@ -42,7 +42,6 @@ value eval_tree(std::shared_ptr<node> node);
 
 value ExecFunc(value func_val, std::vector<value> &&args)
 {
-	value result;
 	if (func_val.isFunc())
 	{
 		auto &f = func_val.toFunc();
@@ -50,33 +49,33 @@ value ExecFunc(value func_val, std::vector<value> &&args)
 		auto previous_scope = cur_scope;
 		cur_scope = f.closure_scope;
 		pushScope();
-		{
-			auto cur_param = f.params;
-			auto cur_arg   = args.begin();
-			while (cur_param != nullptr)
-			{
-				bool pass_by_value = !cur_arg->isRef() || cur_arg->isArray() || cur_arg->isObject();
-				cur_scope->setValue(
-					cur_param->m_string,
-					pass_by_value? *cur_arg : cur_arg->toRef());
-				cur_param = cur_param->m_right;
-				++cur_arg;
-			}
 
-			result = eval_tree(f.stmt);
+		auto cur_param = f.params;
+		auto cur_arg   = args.begin();
+		while (cur_param != nullptr)
+		{
+			bool pass_by_value = !cur_arg->isRef() || cur_arg->isArray() || cur_arg->isObject();
+			cur_scope->setValue(
+				cur_param->m_string,
+				pass_by_value? *cur_arg : cur_arg->toRef());
+			cur_param = cur_param->m_right;
+			++cur_arg;
 		}
+
+		auto &&result = eval_tree(f.stmt);
+		
 		popScope();
 		cur_scope = previous_scope;
+
+		return result;
 	} else if (func_val.isNativeFunc())
 	{
 		auto f = func_val.toNativeFunc();
-		result = f(args);
+		return f(args);
 	} else
 	{
 		throw type_error();
 	}
-
-	return result;
 }
 
 value eval_tree(std::shared_ptr<node> node)
