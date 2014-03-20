@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <string>
 #include <cstdint>
+#include <tcmalloc.h>
 
 namespace izna {
 
