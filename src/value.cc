@@ -20,7 +20,7 @@ value::value(int v):
 
 value::value(double v):
 	m_type(value_type::REAL),
-	m_val(reinterpret_cast<intptr_t>(new double(v)))
+	m_val(*reinterpret_cast<const intptr_t *>(&v))
 {}
 
 value::value(bool v):
@@ -75,11 +75,7 @@ value::value(const value &v):
 	m_val = v.m_val;
 	if (!v.isRef())
 	{
-		if (v.isReal())
-		{
-			auto val = reinterpret_cast<double *>(v.m_val);
-			m_val = reinterpret_cast<intptr_t>(new double(*val));
-		} else if (v.isString())
+		if (v.isString())
 		{
 			auto val = reinterpret_cast<std::string *>(v.m_val);
 			m_val = reinterpret_cast<intptr_t>(new std::string(*val));
@@ -132,11 +128,6 @@ value::~value()
 {
 	if (!isRef())
 	{
-		if (isReal())
-		{
-			delete reinterpret_cast<double *>(m_val);
-		}
-
 		if (isString())
 		{
 			delete reinterpret_cast<std::string *>(m_val);
@@ -305,6 +296,11 @@ int value::toInteger() const
 		return reinterpret_cast<value *>(m_val)->toInteger();
 	}
 
+	if (isNil())
+	{
+		return 0;
+	}
+
 	if (isInteger())
 	{
 		return m_val;
@@ -312,7 +308,7 @@ int value::toInteger() const
 
 	if (isReal())
 	{
-		return static_cast<int>(*reinterpret_cast<double *>(m_val));
+		return static_cast<int>(*reinterpret_cast<const double *>(&m_val));
 	}
 
 	throw type_error();
@@ -330,6 +326,11 @@ double value::toReal() const
 		return reinterpret_cast<value *>(m_val)->toReal();
 	}
 
+	if (isNil())
+	{
+		return 0.0;
+	}
+
 	if (isInteger())
 	{
 		return static_cast<double>(m_val);
@@ -337,7 +338,7 @@ double value::toReal() const
 
 	if (isReal())
 	{
-		return *reinterpret_cast<double *>(m_val);
+		return *reinterpret_cast<const double *>(&m_val);
 	}
 
 	throw type_error();
@@ -407,7 +408,7 @@ std::string value::toString() const
 
 	if (isReal())
 	{
-		return boost::lexical_cast<std::string>(*reinterpret_cast<double *>(m_val));
+		return boost::lexical_cast<std::string>(*reinterpret_cast<const double *>(&m_val));
 	}
 
 	if (isString())
@@ -821,6 +822,25 @@ value value::Assign(const value &rhs) const
 		else
 		{
 			*reinterpret_cast<value *>(m_val) = rhs;
+		}
+		return *this;
+	}
+	
+	throw type_error();
+}
+
+
+value value::Assign(value &&rhs) const
+{
+	if (isRef())
+	{
+		if (rhs.isRef())
+		{
+			*reinterpret_cast<value *>(m_val) = rhs.toRef();
+		}
+		else
+		{
+			*reinterpret_cast<value *>(m_val) = std::move(rhs);
 		}
 		return *this;
 	}
