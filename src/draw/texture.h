@@ -14,6 +14,8 @@ public:
 	virtual ~TextureBase();
 
 	virtual GLuint GetHandle() = 0;
+	virtual GLuint GetTexCoordBuffer() = 0;
+
 	virtual int GetWidth() = 0;
 	virtual int GetHeight() = 0;
 	virtual double GetCoordLeft() = 0;
@@ -30,6 +32,7 @@ class RawTexture: public TextureBase
 {
 private:
 	GLuint m_texture;
+	GLuint m_texcoord;
 	int m_width, m_height;
 
 	RawTexture(const RawTexture &);
@@ -40,6 +43,8 @@ public:
 	~RawTexture();
 
 	virtual GLuint GetHandle();
+	virtual GLuint GetTexCoordBuffer();
+
 	virtual int GetWidth();
 	virtual int GetHeight();
 	virtual double GetCoordLeft();
@@ -64,10 +69,15 @@ class Texture: public TextureBase
 {
 private:
 	std::shared_ptr<RawTexture> m_rt;
+	GLuint m_texcoord;
 	int m_x, m_y, m_width, m_height;
 
+	// copy inhibition
+	Texture(const Texture &);
+	Texture(const Texture &&);
+	Texture &operator=(const Texture &);
+
 public:
-	explicit Texture();
 	explicit Texture(std::shared_ptr<RawTexture> rt);
 	explicit Texture(
 		std::shared_ptr<RawTexture> rt,
@@ -82,7 +92,11 @@ public:
 		int width,
 		int height);
 
+	~Texture();
+
 	virtual GLuint GetHandle();
+	virtual GLuint GetTexCoordBuffer();
+
 	virtual int GetWidth();
 	virtual int GetHeight();
 	virtual double GetCoordLeft();
@@ -93,12 +107,6 @@ public:
 	std::shared_ptr<RawTexture> GetRawTexture();
 	int GetX();
 	int GetY();
-
-	void SetRawTexture(std::shared_ptr<RawTexture> rt);
-	void SetX(int x);
-	void SetY(int y);
-	void SetWidth(int w);
-	void SetHeight(int h);
 
 	typedef Texture partial_expression;
 };
